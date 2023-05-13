@@ -15,14 +15,23 @@ using System.Windows.Shapes;
 
 namespace RecognizerGenerator
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
+  /// <summary>
+  /// Interaction logic for MainWindow.xaml
+  /// </summary>
+  public partial class MainWindow : Window
+  {
+    public List<InputSymbol> InputSymbols { get; set; } = new() { new("a"), new("b") };
+    public List<MachineState> States { get; set; } = new() { new("N"), new("E"), new("B") };
+
+    public MainWindow()
     {
-        public MainWindow()
-        {
-            InitializeComponent();
-        }
+      InitializeComponent();
+      DataContext = this;
     }
+
+    private void GenerateButton_Click(object sender, RoutedEventArgs e)
+    {
+
+    }
+  }
 }

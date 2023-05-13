@@ -9,88 +9,57 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+
         <StackPanel Grid.Row="0" Orientation="Horizontal">
             <Label Content="Количество строк:"/>
             <TextBox Name="RowsTextBox" Margin="5"/>
             <Label Content="Количество колонок:"/>
             <TextBox Name="ColumnsTextBox" Margin="5"/>
-            <Button Name="GenerateButton" Content="Сгенерировать" Margin="5"/>
+            <Button Name="GenerateButton" Content="Сгенерировать" Margin="5" Click="GenerateButton_Click"/>
         </StackPanel>
-        <Grid Grid.Row="2" Margin="10">
+        <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <!--<ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>-->
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <Label Grid.Row="0" Content="Таблица переходов автомата:"/>
-            <DataGrid Grid.Row="1" ItemsSource="{Binding Items}"  AutoGenerateColumns="True">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Текущее состояие" IsReadOnly="True" Binding="{Binding Header}" />
-                    <DataGridTextColumn Header="Символ 1" Binding="{Binding Column1}"/>
-                    <DataGridTextColumn Header="Символ 2" Binding="{Binding Column2}"/>
-                    <DataGridTextColumn Header="Символ 3" Binding="{Binding Column3}"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Grid>
-        <!--<Grid Grid.Row="1">
-            <DataGrid ItemsSource="{Binding TransitionTable}" AutoGenerateColumns="False" Margin="10">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="From State" Binding="{Binding FromState}" />
-                    <DataGridTextColumn Header="To State" Binding="{Binding ToState}" />
-                    <DataGridTemplateColumn Header="Input Symbol">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <ComboBox ItemsSource="{Binding DataContext.InputSymbols, RelativeSource={RelativeSource AncestorType=Window}}"
-                                      SelectedItem="{Binding InputSymbol}" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-            <Button Content="Generate Code" Margin="10, 10, 10, 0" VerticalAlignment="Top" HorizontalAlignment="Right" Command="{Binding GenerateCodeCommand}" />
-        </Grid>-->
-        <!--<Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition />
-        </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10">
-            <TextBlock Text="From State" Margin="5" />
-            <ComboBox ItemsSource="{Binding States}" SelectedItem="{Binding SelectedState}" Margin="5" />
-            <TextBlock Text="Input Symbol" Margin="5" />
-            <ComboBox ItemsSource="{Binding InputSymbols}" SelectedItem="{Binding SelectedInputSymbol}" Margin="5" />
-            <TextBlock Text="To State" Margin="5" />
-            <ComboBox ItemsSource="{Binding States}" SelectedItem="{Binding SelectedToState}" Margin="5" />
-            <Button Content="Add Transition" Command="{Binding AddTransitionCommand}" Margin="5" />
-        </StackPanel>
-        <DataGrid Grid.Row="1" ItemsSource="{Binding TransitionTable}" AutoGenerateColumns="False" Margin="10">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="From State" Binding="{Binding FromState}" />
-                <DataGridTemplateColumn Header="Input Symbols">
-                    <DataGridTemplateColumn.CellTemplate>
+
+            <StackPanel Grid.Column="0" Orientation="Vertical">
+                <Label Content="Состояния:" />
+                <DataGrid x:Name="StatesDataGrid" ItemsSource="{Binding States}" HeadersVisibility="None"></DataGrid>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Vertical">
+                <Label Content="Входные символы:" />
+                <DataGrid x:Name="InputSymbolsDataGrid" ItemsSource="{Binding InputSymbols}" HeadersVisibility="None"></DataGrid>
+            </StackPanel>
+            <Grid Grid.Column="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" Content="Таблица переходов автомата:"/>
+                <DataGrid Grid.Row="1" ItemsSource="{Binding .}">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="Исходное состояние" IsReadOnly="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Source=States, Path=[%i%]}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                    <DataGrid.RowHeaderTemplate>
                         <DataTemplate>
-                            <ItemsControl ItemsSource="{Binding InputSymbolToState}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <UniformGrid Columns="{Binding DataContext.InputSymbols.Count, RelativeSource={RelativeSource AncestorType=Window}}" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding}" />
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
+                            <TextBlock Text="{Binding Source=States, Path=[%i%]}" />
                         </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>-->
+                    </DataGrid.RowHeaderTemplate>
+                </DataGrid>
+            </Grid>
+        </Grid>
     </Grid>
 </Window>
