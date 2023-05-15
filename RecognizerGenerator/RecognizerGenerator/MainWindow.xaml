@@ -3,9 +3,38 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:dataGrid2D="http://gu.se/DataGrid2D"
         xmlns:local="clr-namespace:RecognizerGenerator"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
+    <Window.DataContext>
+        <local:ViewModel/>
+    </Window.DataContext>
+    <Window.Resources>
+        <DataTemplate x:Key="DataTemplate_NameText">
+            <TextBlock Text="{Binding Name}"></TextBlock>
+        </DataTemplate>
+        <DataTemplate x:Key="DataTemplate_Level2">
+            <ComboBox ItemsSource="{Binding Path=DataContext.States, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Window}}}" Margin="4,4,4,4">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}"></TextBlock>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <!--<TextBlock Text="{Binding Name}"/>-->
+        </DataTemplate>
+
+        <DataTemplate x:Key="DataTemplate_Level1">
+            <ItemsControl ItemsSource="{Binding}" ItemTemplate="{DynamicResource DataTemplate_Level2}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </DataTemplate>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -13,10 +42,10 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <Label Content="Количество строк:"/>
+            <!--<Label Content="Количество строк:"/>
             <TextBox Name="RowsTextBox" Margin="5"/>
             <Label Content="Количество колонок:"/>
-            <TextBox Name="ColumnsTextBox" Margin="5"/>
+            <TextBox Name="ColumnsTextBox" Margin="5"/>-->
             <Button Name="GenerateButton" Content="Сгенерировать" Margin="5" Click="GenerateButton_Click"/>
         </StackPanel>
         <Grid Grid.Row="1">
@@ -26,12 +55,12 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0" Orientation="Vertical">
+            <StackPanel Grid.Column="0" Orientation="Vertical" Margin="0 0 5 0">
                 <Label Content="Состояния:" />
                 <DataGrid x:Name="StatesDataGrid" ItemsSource="{Binding States}" HeadersVisibility="None"></DataGrid>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Vertical">
-                <Label Content="Входные символы:" />
+                <Label Content="Входные символы|Задающие их выражения" />
                 <DataGrid x:Name="InputSymbolsDataGrid" ItemsSource="{Binding InputSymbols}" HeadersVisibility="None"></DataGrid>
             </StackPanel>
             <Grid Grid.Column="2">
@@ -43,22 +72,29 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Label Grid.Row="0" Content="Таблица переходов автомата:"/>
-                <DataGrid Grid.Row="1" ItemsSource="{Binding .}">
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="Исходное состояние" IsReadOnly="True">
-                            <DataGridTemplateColumn.CellTemplate>
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Orientation="Vertical">
+                        <Label>Исходное состояние</Label>
+                        <ListBox ItemsSource="{Binding States, Mode=OneWay}" ItemTemplate="{DynamicResource DataTemplate_NameText}"/>
+                    </StackPanel>
+                    <DataGrid Name="TransitionStatesDataGrid" Grid.Column="1" dataGrid2D:ItemsSource.Array2D="{Binding TransitionTable}">
+                        <!--<DataTemplate>
+                        <ComboBox ItemsSource="{Binding States}" Margin="4,4,4,4">
+                            <ComboBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Source=States, Path=[%i%]}" />
+                                    <TextBlock Text="{Binding Name}"></TextBlock>
                                 </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                    <DataGrid.RowHeaderTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Source=States, Path=[%i%]}" />
-                        </DataTemplate>
-                    </DataGrid.RowHeaderTemplate>
-                </DataGrid>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </DataTemplate>-->
+                    </DataGrid>
+                </Grid>
             </Grid>
         </Grid>
     </Grid>
