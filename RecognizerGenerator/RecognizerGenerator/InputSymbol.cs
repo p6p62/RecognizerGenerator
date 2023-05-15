@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace RecognizerGenerator
 {
-  public class InputSymbol
+  public class InputSymbol : FiniteStateMachinePart
   {
-    public string Name { get; set; } = "";
     public string AcceptedCharactersExpression { get; set; } = "";
 
     public InputSymbol() { }

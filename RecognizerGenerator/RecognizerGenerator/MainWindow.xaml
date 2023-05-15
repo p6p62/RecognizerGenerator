@@ -52,18 +52,22 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="auto"/>
-                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0" Orientation="Vertical" Margin="0 0 5 0">
-                <Label Content="Состояния:" />
-                <DataGrid x:Name="StatesDataGrid" ItemsSource="{Binding States}" HeadersVisibility="None"></DataGrid>
+            <StackPanel>
+                <DataGrid x:Name="StatesDataGrid" ItemsSource="{Binding States}" AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Состояния" Binding="{Binding Name}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <DataGrid x:Name="InputSymbolsDataGrid" ItemsSource="{Binding InputSymbols}" AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Входные символы" Binding="{Binding Name}"/>
+                        <DataGridTextColumn Header="Диапазоны" Binding="{Binding AcceptedCharactersExpression}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
             </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Vertical">
-                <Label Content="Входные символы|Задающие их выражения" />
-                <DataGrid x:Name="InputSymbolsDataGrid" ItemsSource="{Binding InputSymbols}" HeadersVisibility="None"></DataGrid>
-            </StackPanel>
-            <Grid Grid.Column="2">
+            <Grid Grid.Column="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
@@ -75,15 +79,13 @@
 
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="auto"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Orientation="Vertical">
-                        <Label>Исходное состояние</Label>
-                        <ListBox ItemsSource="{Binding States, Mode=OneWay}" ItemTemplate="{DynamicResource DataTemplate_NameText}"/>
-                    </StackPanel>
-                    <DataGrid Name="TransitionStatesDataGrid" Grid.Column="1" dataGrid2D:ItemsSource.Array2D="{Binding TransitionTable}">
+                    <DataGrid Name="TransitionStatesDataGrid" Grid.Column="1"
+                              dataGrid2D:ItemsSource.Array2D="{Binding TransitionTable}"
+                              dataGrid2D:ItemsSource.RowHeadersSource="{Binding StatesNames}"
+                              dataGrid2D:ItemsSource.ColumnHeadersSource="{Binding InputSymbolsNames}">
                         <!--<DataTemplate>
                         <ComboBox ItemsSource="{Binding States}" Margin="4,4,4,4">
                             <ComboBox.ItemTemplate>
