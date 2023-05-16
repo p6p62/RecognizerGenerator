@@ -51,22 +51,31 @@
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"/>
-                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <StackPanel>
-                <DataGrid x:Name="StatesDataGrid" ItemsSource="{Binding States}" AutoGenerateColumns="False">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Состояния" Binding="{Binding Name}"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-                <DataGrid x:Name="InputSymbolsDataGrid" ItemsSource="{Binding InputSymbols}" AutoGenerateColumns="False">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Входные символы" Binding="{Binding Name}"/>
-                        <DataGridTextColumn Header="Диапазоны" Binding="{Binding AcceptedCharactersExpression}"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </StackPanel>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+
+                <ScrollViewer>
+                    <DataGrid x:Name="StatesDataGrid" ItemsSource="{Binding States}" AutoGenerateColumns="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Состояния" Binding="{Binding Name}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </ScrollViewer>
+                <ScrollViewer Grid.Row="1">
+                    <DataGrid x:Name="InputSymbolsDataGrid" ItemsSource="{Binding InputSymbols}" AutoGenerateColumns="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Входные символы" Binding="{Binding Name}"/>
+                            <DataGridTextColumn Header="Диапазоны" Binding="{Binding AcceptedCharactersExpression}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </ScrollViewer>
+            </Grid>
             <Grid Grid.Column="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -78,23 +87,25 @@
                 <Label Grid.Row="0" Content="Таблица переходов автомата:"/>
 
                 <Grid Grid.Row="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
 
-                    <DataGrid Name="TransitionStatesDataGrid" Grid.Column="1"
-                              dataGrid2D:ItemsSource.Array2D="{Binding TransitionTable}"
+                    <TextBlock Grid.Row="1" Text="Исходное состояние" TextAlignment="Right">
+                        <TextBlock.LayoutTransform>
+                            <RotateTransform Angle="-90"/>
+                        </TextBlock.LayoutTransform>
+                    </TextBlock>
+                    <TextBlock Grid.Column="1" Text="Входной символ"/>
+                    <DataGrid Name="TransitionStatesDataGrid" Grid.Row="1" Grid.Column="1" CanUserReorderColumns="False"
+                              dataGrid2D:ItemsSource.RowsSource="{Binding TransitionTable}"
                               dataGrid2D:ItemsSource.RowHeadersSource="{Binding StatesNames}"
                               dataGrid2D:ItemsSource.ColumnHeadersSource="{Binding InputSymbolsNames}">
-                        <!--<DataTemplate>
-                        <ComboBox ItemsSource="{Binding States}" Margin="4,4,4,4">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Name}"></TextBlock>
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-                    </DataTemplate>-->
                     </DataGrid>
                 </Grid>
             </Grid>

@@ -34,10 +34,13 @@ namespace RecognizerGenerator
 
     private void GenerateButton_Click(object sender, RoutedEventArgs e)
     {
+      var tempItemSource = TransitionStatesDataGrid.ItemsSource;
+      TransitionStatesDataGrid.ItemsSource = null;
       for (int i = 0; i < TransitionStatesDataGrid.Columns.Count; i++)
       {
         TransitionStatesDataGrid.Columns[i] = new DataGridTemplateColumn() { CellTemplate = (DataTemplate)Resources["DataTemplate_Level2"] };
       }
+      TransitionStatesDataGrid.ItemsSource = tempItemSource;
     }
   }
 }
