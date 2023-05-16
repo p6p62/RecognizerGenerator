@@ -9,11 +9,7 @@ namespace RecognizerGenerator
   public class InputSymbol : FiniteStateMachinePart
   {
     public string AcceptedCharactersExpression { get; set; } = "";
-
     public InputSymbol() { }
-    public InputSymbol(string parName)
-    {
-      Name = parName;
-    }
+    public InputSymbol(string parName) : base(parName) { }
   }
 }

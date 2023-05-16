@@ -14,27 +14,12 @@
         <DataTemplate x:Key="DataTemplate_NameText">
             <TextBlock Text="{Binding Name}"></TextBlock>
         </DataTemplate>
-        <DataTemplate x:Key="DataTemplate_Level2">
-            <ComboBox 
-                ItemsSource="{Binding Path=DataContext.States, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Window}}}"
-                Margin="4,4,4,4">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Name}"></TextBlock>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
+        <DataTemplate x:Key="DataTemplate_StateChoose">
+            <ComboBox
+                IsReadOnly="True"
+                ItemsSource="{Binding Path=DataContext.StatesNames, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Window}}}"
+                SelectedValue="{Binding Name}">
             </ComboBox>
-            <!--<TextBlock Text="{Binding Name}"/>-->
-        </DataTemplate>
-
-        <DataTemplate x:Key="DataTemplate_Level1">
-            <ItemsControl ItemsSource="{Binding}" ItemTemplate="{DynamicResource DataTemplate_Level2}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-            </ItemsControl>
         </DataTemplate>
     </Window.Resources>
     <Grid>
@@ -44,10 +29,6 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <!--<Label Content="Количество строк:"/>
-            <TextBox Name="RowsTextBox" Margin="5"/>
-            <Label Content="Количество колонок:"/>
-            <TextBox Name="ColumnsTextBox" Margin="5"/>-->
             <Button Name="GenerateButton" Content="Сгенерировать" Margin="5" Click="GenerateButton_Click"/>
         </StackPanel>
         <Grid Grid.Row="1">
@@ -63,9 +44,7 @@
                 </Grid.RowDefinitions>
 
                 <ScrollViewer>
-                    <DataGrid x:Name="StatesDataGrid" ItemsSource="{Binding States}" AutoGenerateColumns="False"
-                              AddingNewItem="StatesDataGrid_AddingNewItem"
-                              RowEditEnding="StatesDataGrid_RowEditEnding">
+                    <DataGrid x:Name="StatesDataGrid" ItemsSource="{Binding States}" AutoGenerateColumns="False">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Состояния" Binding="{Binding Name}"/>
                         </DataGrid.Columns>
@@ -107,11 +86,13 @@
                     </TextBlock>
                     <TextBlock Grid.Column="1" Text="Входной символ"/>
                     <DataGrid Name="TransitionStatesDataGrid" Grid.Row="1" Grid.Column="1" CanUserReorderColumns="False"
+                              SelectionUnit="Cell"
                               AutoGenerateColumns="True"
+                              SelectionMode="Single"
                               dataGrid2D:ItemsSource.RowsSource="{Binding TransitionTable}"
                               dataGrid2D:ItemsSource.RowHeadersSource="{Binding StatesNames}"
                               dataGrid2D:ItemsSource.ColumnHeadersSource="{Binding InputSymbolsNames}"
-                              dataGrid2D:Cell.Template="{DynamicResource DataTemplate_Level2}">
+                              dataGrid2D:Cell.Template="{DynamicResource DataTemplate_NameText}">
                     </DataGrid>
                 </Grid>
             </Grid>

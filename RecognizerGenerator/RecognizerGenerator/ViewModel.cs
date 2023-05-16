@@ -15,9 +15,14 @@ namespace RecognizerGenerator
   {
     public ObservableCollection<InputSymbol> InputSymbols { get; set; } = new() { new("a"), new("b") };
     public ObservableCollection<string> InputSymbolsNames { get; } = new();
-    public ObservableCollection<MachineState> States { get; set; } = new() { new("N"), new("E"), new("B") };
+    public ObservableCollection<MachineState> States { get; set; } = new() { new("S"), new("A"), new("E") };
     public ObservableCollection<string> StatesNames { get; } = new();
-    public ObservableCollection<ObservableCollection<MachineState>> TransitionTable { get; set; } = new();
+    public ObservableCollection<ObservableCollection<MachineState>> TransitionTable { get; set; } = new()
+    {
+      new() { new("A"), new("E") },
+      new() { new("A"), new("A") },
+      new() { new("E"), new("E") },
+    };
 
     public ViewModel()
     {
@@ -31,14 +36,6 @@ namespace RecognizerGenerator
 
     private void FillBeginInitializationData()
     {
-      for (int i = 0; i < States.Count; i++)
-      {
-        ObservableCollection<MachineState> l = new();
-        for (int j = 0; j < InputSymbols.Count; j++)
-          l.Add(new());
-        TransitionTable.Add(l);
-      }
-
       InputSymbols.ToList().ForEach(s => InputSymbolsNames.Add(s.Name));
       States.ToList().ForEach(s => StatesNames.Add(s.Name));
     }
@@ -54,9 +51,12 @@ namespace RecognizerGenerator
     private void UpdateStates(object? sender, NotifyCollectionChangedEventArgs? e)
     {
       ResizeStateRows(sender, e);
-      StatesNames.Clear();
-      foreach (MachineState state in States)
-        StatesNames.Add(state.Name);
+      if (StatesNames.Count != States.Count || StatesNames.Zip(States.Select(s => s.Name)).Any(t => t.First != t.Second))
+      {
+        StatesNames.Clear();
+        foreach (MachineState state in States)
+          StatesNames.Add(state.Name);
+      }
     }
 
     private void ResizeStateRows(object? sender, NotifyCollectionChangedEventArgs? e)

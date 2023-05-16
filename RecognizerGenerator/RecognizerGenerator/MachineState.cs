@@ -11,9 +11,6 @@ namespace RecognizerGenerator
   public class MachineState : FiniteStateMachinePart
   {
     public MachineState() { }
-    public MachineState(string parName)
-    {
-      Name = parName;
-    }
+    public MachineState(string parName) : base(parName) { }
   }
 }

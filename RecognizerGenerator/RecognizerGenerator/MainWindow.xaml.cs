@@ -23,28 +23,17 @@ namespace RecognizerGenerator
   /// </summary>
   public partial class MainWindow : Window
   {
-    private DataTemplate? _stateChooseTemplate = null;
-    private ViewModel _dataContext;
+    private readonly ViewModel _dataContext;
 
     public MainWindow()
     {
       InitializeComponent();
+      TransitionStatesDataGrid.SetEditingTemplate((DataTemplate?)Resources["DataTemplate_StateChoose"]);
       _dataContext = (ViewModel)DataContext;
     }
 
     private void GenerateButton_Click(object sender, RoutedEventArgs e)
     {
-    }
-
-    private void StatesDataGrid_AddingNewItem(object sender, AddingNewItemEventArgs e)
-    {
-      _stateChooseTemplate = TransitionStatesDataGrid.GetTemplate();
-      TransitionStatesDataGrid.SetTemplate(null);
-    }
-
-    private void StatesDataGrid_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
-    {
-      TransitionStatesDataGrid.SetTemplate(_stateChooseTemplate);
     }
   }
 }
