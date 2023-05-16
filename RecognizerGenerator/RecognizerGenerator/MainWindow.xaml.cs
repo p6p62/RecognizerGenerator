@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Gu.Wpf.DataGrid2D;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -22,25 +23,28 @@ namespace RecognizerGenerator
   /// </summary>
   public partial class MainWindow : Window
   {
-    //public ObservableCollection<InputSymbol> InputSymbols { get; set; } = new() { new("a"), new("b") };
-    //public ObservableCollection<MachineState> States { get; set; } = new() { new("N"), new("E"), new("B") };
-    //public MachineState[,] TransitionTable { get; set; } = new MachineState[2, 3] { { new("DICK"), new(), new() }, { new(), new(), new() } };
+    private DataTemplate? _stateChooseTemplate = null;
+    private ViewModel _dataContext;
 
     public MainWindow()
     {
-      //DataContext = this;
       InitializeComponent();
+      _dataContext = (ViewModel)DataContext;
     }
 
     private void GenerateButton_Click(object sender, RoutedEventArgs e)
     {
-      var tempItemSource = TransitionStatesDataGrid.ItemsSource;
-      TransitionStatesDataGrid.ItemsSource = null;
-      for (int i = 0; i < TransitionStatesDataGrid.Columns.Count; i++)
-      {
-        TransitionStatesDataGrid.Columns[i] = new DataGridTemplateColumn() { CellTemplate = (DataTemplate)Resources["DataTemplate_Level2"] };
-      }
-      TransitionStatesDataGrid.ItemsSource = tempItemSource;
+    }
+
+    private void StatesDataGrid_AddingNewItem(object sender, AddingNewItemEventArgs e)
+    {
+      _stateChooseTemplate = TransitionStatesDataGrid.GetTemplate();
+      TransitionStatesDataGrid.SetTemplate(null);
+    }
+
+    private void StatesDataGrid_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
+    {
+      TransitionStatesDataGrid.SetTemplate(_stateChooseTemplate);
     }
   }
 }

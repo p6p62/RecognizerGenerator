@@ -15,7 +15,9 @@
             <TextBlock Text="{Binding Name}"></TextBlock>
         </DataTemplate>
         <DataTemplate x:Key="DataTemplate_Level2">
-            <ComboBox ItemsSource="{Binding Path=DataContext.States, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Window}}}" Margin="4,4,4,4">
+            <ComboBox 
+                ItemsSource="{Binding Path=DataContext.States, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Window}}}"
+                Margin="4,4,4,4">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Name}"></TextBlock>
@@ -61,7 +63,9 @@
                 </Grid.RowDefinitions>
 
                 <ScrollViewer>
-                    <DataGrid x:Name="StatesDataGrid" ItemsSource="{Binding States}" AutoGenerateColumns="False">
+                    <DataGrid x:Name="StatesDataGrid" ItemsSource="{Binding States}" AutoGenerateColumns="False"
+                              AddingNewItem="StatesDataGrid_AddingNewItem"
+                              RowEditEnding="StatesDataGrid_RowEditEnding">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Состояния" Binding="{Binding Name}"/>
                         </DataGrid.Columns>
@@ -103,9 +107,11 @@
                     </TextBlock>
                     <TextBlock Grid.Column="1" Text="Входной символ"/>
                     <DataGrid Name="TransitionStatesDataGrid" Grid.Row="1" Grid.Column="1" CanUserReorderColumns="False"
+                              AutoGenerateColumns="True"
                               dataGrid2D:ItemsSource.RowsSource="{Binding TransitionTable}"
                               dataGrid2D:ItemsSource.RowHeadersSource="{Binding StatesNames}"
-                              dataGrid2D:ItemsSource.ColumnHeadersSource="{Binding InputSymbolsNames}">
+                              dataGrid2D:ItemsSource.ColumnHeadersSource="{Binding InputSymbolsNames}"
+                              dataGrid2D:Cell.Template="{DynamicResource DataTemplate_Level2}">
                     </DataGrid>
                 </Grid>
             </Grid>

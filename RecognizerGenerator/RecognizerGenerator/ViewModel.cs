@@ -5,6 +5,9 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace RecognizerGenerator
 {
@@ -79,7 +82,8 @@ namespace RecognizerGenerator
       {
         case NotifyCollectionChangedAction.Add:
           foreach (ObservableCollection<MachineState> stateRow in TransitionTable)
-            stateRow.Insert(e.NewStartingIndex, new());
+            if (InputSymbols.Count > stateRow.Count)
+              stateRow.Insert(e.NewStartingIndex, new());
           break;
         case NotifyCollectionChangedAction.Remove:
           foreach (ObservableCollection<MachineState> stateRow in TransitionTable)
