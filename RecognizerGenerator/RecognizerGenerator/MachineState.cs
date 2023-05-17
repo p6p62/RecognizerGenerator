@@ -10,6 +10,12 @@ namespace RecognizerGenerator
 {
   public class MachineState : FiniteStateMachinePart
   {
+    private bool _isFinalState = false;
+    public bool IsFinalState
+    {
+      get => _isFinalState;
+      set => SetField(ref _isFinalState, value);
+    }
     public MachineState() { }
     public MachineState(string parName) : base(parName) { }
   }

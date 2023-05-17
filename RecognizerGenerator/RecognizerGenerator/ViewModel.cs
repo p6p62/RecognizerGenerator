@@ -15,8 +15,12 @@ namespace RecognizerGenerator
   {
     public ObservableCollection<InputSymbol> InputSymbols { get; set; } = new() { new("a"), new("b") };
     public ObservableCollection<string> InputSymbolsNames { get; } = new();
+
     public ObservableCollection<MachineState> States { get; set; } = new() { new("S"), new("A"), new("E") };
     public ObservableCollection<string> StatesNames { get; } = new();
+
+    public MachineState? InitialState { get; set; }
+
     public ObservableCollection<ObservableCollection<MachineState>> TransitionTable { get; set; } = new()
     {
       new() { new("A"), new("E") },
@@ -38,6 +42,8 @@ namespace RecognizerGenerator
     {
       InputSymbols.ToList().ForEach(s => InputSymbolsNames.Add(s.Name));
       States.ToList().ForEach(s => StatesNames.Add(s.Name));
+
+      InitialState = States[0];
     }
 
     private void UpdateSymbols(object? sender, NotifyCollectionChangedEventArgs? e)

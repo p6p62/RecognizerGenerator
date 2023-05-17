@@ -6,7 +6,7 @@
         xmlns:dataGrid2D="http://gu.se/DataGrid2D"
         xmlns:local="clr-namespace:RecognizerGenerator"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Генератор распознавателей" Height="450" Width="800">
     <Window.DataContext>
         <local:ViewModel/>
     </Window.DataContext>
@@ -39,18 +39,23 @@
 
             <Grid>
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
                     <RowDefinition/>
+                    <RowDefinition Height="auto"/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
 
-                <ScrollViewer>
+                <TextBlock Text="Состояния автомата"/>
+                <ScrollViewer Grid.Row="1">
                     <DataGrid x:Name="StatesDataGrid" ItemsSource="{Binding States}" AutoGenerateColumns="False">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Состояния" Binding="{Binding Name}"/>
+                            <DataGridTextColumn Header="Имя" Binding="{Binding Name}"/>
+                            <DataGridCheckBoxColumn Header="Конечное состояние" Binding="{Binding IsFinalState}"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </ScrollViewer>
-                <ScrollViewer Grid.Row="1">
+                <TextBlock Grid.Row="2" Text="Входные символы"/>
+                <ScrollViewer Grid.Row="3">
                     <DataGrid x:Name="InputSymbolsDataGrid" ItemsSource="{Binding InputSymbols}" AutoGenerateColumns="False">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Входные символы" Binding="{Binding Name}"/>
@@ -67,8 +72,8 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Label Grid.Row="0" Content="Таблица переходов автомата:"/>
 
+                <TextBlock Grid.Row="0" Text="Таблица переходов автомата:"/>
                 <Grid Grid.Row="1">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto"/>

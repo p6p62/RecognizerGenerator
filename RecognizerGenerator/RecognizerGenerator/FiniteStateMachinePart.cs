@@ -18,7 +18,7 @@ namespace RecognizerGenerator
     public string Name
     {
       get => _name;
-      set => (this).SetField(ref _name, value);
+      set => SetField(ref _name, value);
     }
 
     public FiniteStateMachinePart() { }
@@ -27,6 +27,13 @@ namespace RecognizerGenerator
       Name = parName;
     }
 
+    /// <summary>
+    /// Устанавливает значение поля и уведомляет об изменении свойства
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="refField"></param>
+    /// <param name="parValue"></param>
+    /// <param name="parPropertyName"></param>
     protected void SetField<T>(ref T refField, T parValue, [CallerMemberName] string parPropertyName = "")
     {
       refField = parValue;
