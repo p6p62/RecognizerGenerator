@@ -46,14 +46,34 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Text="Состояния автомата"/>
-                <ScrollViewer Grid.Row="1">
+                <StackPanel Grid.Row="1" Orientation="Horizontal">
                     <DataGrid x:Name="StatesDataGrid" ItemsSource="{Binding States}" AutoGenerateColumns="False">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Имя" Binding="{Binding Name}"/>
                             <DataGridCheckBoxColumn Header="Конечное состояние" Binding="{Binding IsFinalState}"/>
                         </DataGrid.Columns>
                     </DataGrid>
-                </ScrollViewer>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Начальное состояние"/>
+                        <ListBox Grid.Row="1" ItemsSource="{Binding States}"
+                             SelectedItem="{Binding InitialState}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <RadioButton Focusable="False"
+                                         IsHitTestVisible="False"
+                                         Content="{Binding Name}"
+                                         IsChecked="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}">
+                                    </RadioButton>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </StackPanel>
                 <TextBlock Grid.Row="2" Text="Входные символы"/>
                 <ScrollViewer Grid.Row="3">
                     <DataGrid x:Name="InputSymbolsDataGrid" ItemsSource="{Binding InputSymbols}" AutoGenerateColumns="False">
