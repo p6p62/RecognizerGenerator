@@ -48,13 +48,15 @@ namespace RecognizerGenerator
     #endregion
 
     private readonly FiniteStateMachine _recognizerStateMachine;
+    private readonly bool _isLastCharacterUniversal;
 
     // TODO сделать проверку имени
     public string RecognizerProgramName { get; set; } = "recognizer";
 
-    public CodeGeneratorToPascal(FiniteStateMachine recognizerStateMachine)
+    public CodeGeneratorToPascal(FiniteStateMachine recognizerStateMachine, bool isLastCharacterUniversal)
     {
       _recognizerStateMachine = recognizerStateMachine;
+      _isLastCharacterUniversal = isLastCharacterUniversal;
     }
 
     /// <summary>
@@ -280,7 +282,10 @@ namespace RecognizerGenerator
     private List<string> GetIfStatements()
     {
       List<string> ifStatements = new();
-      foreach (InputSymbol inputSymbol in _recognizerStateMachine.InputSymbols)
+      List<InputSymbol> symbolsInConditions = _isLastCharacterUniversal
+        ? _recognizerStateMachine.InputSymbols.Take(_recognizerStateMachine.InputSymbols.Count - 1).ToList()
+        : _recognizerStateMachine.InputSymbols;
+      foreach (InputSymbol inputSymbol in symbolsInConditions)
       {
         ifStatements.Add($"if {VAR_NAME_SINGLE_CHAR} in {REAL_INPUT_SYMBOLS_PREFIX}{inputSymbol.Name} then");
         ifStatements.Add($"{VAR_NAME_SINGLE_CHAR_KIND} := {OUT_PREFIX_INPUT_SYMBOL}{inputSymbol.Name}");
@@ -288,11 +293,12 @@ namespace RecognizerGenerator
       }
 
       // TODO обработать ошибку по-нормальному
-      ifStatements.Add($"{VAR_NAME_SINGLE_CHAR_KIND} := -1;");
+      if (_isLastCharacterUniversal)
+        ifStatements.Add($"{VAR_NAME_SINGLE_CHAR_KIND} := {OUT_PREFIX_INPUT_SYMBOL}{_recognizerStateMachine.InputSymbols.Last().Name};");
       return ifStatements;
     }
 
-    private List<string> GetEndChecking()
+    private static List<string> GetEndChecking()
     {
       return new()
       {

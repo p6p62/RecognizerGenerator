@@ -16,7 +16,8 @@ namespace RecognizerGenerator
     public ObservableCollection<InputSymbol> InputSymbols { get; set; } = new()
     {
       new("a") { AcceptedCharactersExpression = "a-zA-Z_" },
-      new("b") { AcceptedCharactersExpression = "0-9" }
+      new("b") { AcceptedCharactersExpression = "0-9" },
+      new("x")
     };
     public ObservableCollection<string> InputSymbolsNames { get; } = new();
 
@@ -32,10 +33,12 @@ namespace RecognizerGenerator
 
     public ObservableCollection<ObservableCollection<MachineState>> TransitionTable { get; set; } = new()
     {
-      new() { new("A"), new("E") },
-      new() { new("A"), new("A") },
-      new() { new("E"), new("E") },
+      new() { new("A"), new("E"), new("E") },
+      new() { new("A"), new("A"), new("E") },
+      new() { new("E"), new("E"), new("E") },
     };
+
+    public bool IsLastCharacterUniversal { get; set; } = true;
 
     public ViewModel()
     {

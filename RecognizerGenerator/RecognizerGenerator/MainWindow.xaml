@@ -70,7 +70,10 @@
                         </ListBox>
                     </Grid>
                 </StackPanel>
-                <TextBlock Grid.Row="2" Text="Входные символы"/>
+                <StackPanel Grid.Row="2">
+                    <TextBlock Text="Входные символы"/>
+                    <CheckBox Content="Последний - универсальный" IsChecked="{Binding IsLastCharacterUniversal}"/>
+                </StackPanel>
                 <ScrollViewer Grid.Row="3">
                     <DataGrid x:Name="InputSymbolsDataGrid" ItemsSource="{Binding InputSymbols}" AutoGenerateColumns="False">
                         <DataGrid.Columns>

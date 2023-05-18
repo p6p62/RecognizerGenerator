@@ -38,7 +38,7 @@ namespace RecognizerGenerator
       FiniteStateMachine recognizerFiniteStateMachine = new(_dataContext.States.ToList(),
         _dataContext.InitialState ?? _dataContext.States.Last(), _dataContext.InputSymbols.ToList(), transitionTable);
 
-      CodeGeneratorToPascal generator = new(recognizerFiniteStateMachine);
+      CodeGeneratorToPascal generator = new(recognizerFiniteStateMachine, _dataContext.IsLastCharacterUniversal);
       string[] outputCode = generator.GenerateRecognizerCode();
 
       RecognizerOutputCodeTextBox.Text = string.Join('\n', outputCode);
