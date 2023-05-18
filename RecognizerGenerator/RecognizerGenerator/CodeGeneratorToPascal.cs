@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace RecognizerGenerator
@@ -22,8 +23,6 @@ namespace RecognizerGenerator
     #region Имена типов в секции типов (type)
     public const string TYPE_NAME_STATE = "TState";
     public const string TYPE_NAME_INPUT_SYMBOL = "TInputSymbol";
-    // TODO подумать над генерацией множества значений для конечных состояний вместо задания отдельного типа
-    public const string TYPE_NAME_FINAL_STATES = "TFinalState";
     #endregion
 
     #region Имена префиксов для переменных под множества символов из реального входного потока
@@ -39,6 +38,12 @@ namespace RecognizerGenerator
     public const string VAR_NAME_STATE_SUCCESS = "SuccessState";
     public const string VAR_NAME_SINGLE_CHAR = "SingleChar";
     public const string VAR_NAME_SINGLE_CHAR_KIND = "InputSymbolKind";
+    public const string VAR_NAME_FINAL_STATES_SET = "FinalStates";
+    #endregion
+
+    #region Сообщения программы
+    public const string MESSAGE_ACCEPTED = "Допускается";
+    public const string MESSAGE_REJECTED = "Не допускается";
     #endregion
     #endregion
 
@@ -119,8 +124,6 @@ namespace RecognizerGenerator
       {
         "type",
         $"{TYPE_NAME_STATE} = {OUT_PREFIX_STATE}{states[0]}..{OUT_PREFIX_STATE}{states.Last()};",
-        // TODO подумать, что делать с конечными состояниями
-        $"{TYPE_NAME_FINAL_STATES} = {OUT_PREFIX_STATE}{states[0]}..{OUT_PREFIX_STATE}{states.Last()};",
         $"{TYPE_NAME_INPUT_SYMBOL} = {OUT_PREFIX_INPUT_SYMBOL}{inputSymbols[0]}..{OUT_PREFIX_INPUT_SYMBOL}{inputSymbols.Last()};"
       };
     }
@@ -135,9 +138,9 @@ namespace RecognizerGenerator
         $"{VAR_NAME_COUNTER_I} : integer;",
         $"{VAR_NAME_TRANSITION_TABLE} : array[0..{CONSTANT_NAME_STATES_COUNT} - 1, 0..{CONSTANT_NAME_INPUT_SYMBOLS_COUNT} - 1] of {TYPE_NAME_STATE};",
         $"{VAR_NAME_INPUT_STRING} : string;",
-        $"{VAR_NAME_STATE_SUCCESS} : {TYPE_NAME_FINAL_STATES};",
         $"{VAR_NAME_SINGLE_CHAR} : char;",
-        $"{VAR_NAME_SINGLE_CHAR_KIND} : {TYPE_NAME_INPUT_SYMBOL};"
+        $"{VAR_NAME_SINGLE_CHAR_KIND} : {TYPE_NAME_INPUT_SYMBOL};",
+        $"{VAR_NAME_FINAL_STATES_SET} : set of {TYPE_NAME_STATE};"
       };
       variableSection.AddRange(_recognizerStateMachine.InputSymbols.Select(
         s => $"{REAL_INPUT_SYMBOLS_PREFIX}{s} : set of char;"));
@@ -148,6 +151,8 @@ namespace RecognizerGenerator
     {
       List<string> statements = new() { "begin" };
       statements.AddRange(GetDataInitializationBlock());
+      statements.AddRange(GetWhileLoopStatement());
+      statements.AddRange(GetEndChecking());
       statements.Add("end.");
       return statements;
     }
@@ -155,7 +160,147 @@ namespace RecognizerGenerator
     private List<string> GetDataInitializationBlock()
     {
       List<string> dataInitialization = new();
+      dataInitialization.AddRange(GetInputSymbolSets());
+      dataInitialization.Add("");
+      dataInitialization.AddRange(GetTransitionTableInitialization());
+      dataInitialization.AddRange(GetInputStringReading());
+      dataInitialization.Add("");
+      dataInitialization.AddRange(GetVariableInitialization());
       return dataInitialization;
+    }
+
+    private List<string> GetInputSymbolSets()
+    {
+      List<string> symbolSets = new();
+
+      // для каждого входного символа формируется соответствующее множество со значениями из пользовательского ввода
+      foreach (InputSymbol inputSymbol in _recognizerStateMachine.InputSymbols)
+      {
+        StringBuilder symbolsSetInitializationExpression = new(
+          $"{REAL_INPUT_SYMBOLS_PREFIX}{inputSymbol.Name} := [");
+        symbolsSetInitializationExpression.Append(GetRealCharactersSetExpression(inputSymbol.AcceptedCharactersExpression));
+        symbolsSetInitializationExpression.Append("];");
+        symbolSets.Add(symbolsSetInitializationExpression.ToString());
+      }
+      return symbolSets;
+    }
+
+    private static StringBuilder GetRealCharactersSetExpression(string acceptedCharactersExpression)
+    {
+      // распознаёт и захватывает диапазоны непробельных символов вида <начальный символ>-<конечный символ>
+      // примеры: A-Z, f-q, !-5,
+      // а также одиночные символы: s, t, _, *, +
+      Regex charRangeRegex = new(@"(?<rangeStart>\S)\-(?<rangeEnd>\S)|(?<single>\S)", RegexOptions.ExplicitCapture);
+
+      StringBuilder setInitializationExpression = new();
+      MatchCollection matchedCharRanges = charRangeRegex.Matches(acceptedCharactersExpression);
+      foreach (Match match in matchedCharRanges.Cast<Match>())
+      {
+        if (match.Groups["single"].Success)
+        {
+          string single = match.Groups["single"].Value;
+          setInitializationExpression.Append($"\'{single}\', ");
+        }
+        else
+        {
+          string start = match.Groups["rangeStart"].Value;
+          string end = match.Groups["rangeEnd"].Value;
+          setInitializationExpression.Append($"\'{start}\'..\'{end}\', ");
+        }
+      }
+
+      // удаление последней запятой с пробелом
+      if (setInitializationExpression.Length >= 2)
+        setInitializationExpression.Remove(setInitializationExpression.Length - 2, 2);
+      return setInitializationExpression;
+    }
+
+    private List<string> GetTransitionTableInitialization()
+    {
+      List<MachineState> states = _recognizerStateMachine.States;
+      List<InputSymbol> inputSymbols = _recognizerStateMachine.InputSymbols;
+      List<string> transitionTableInitialization = new();
+      for (int i = 0; i < states.Count; i++)
+      {
+        for (int j = 0; j < inputSymbols.Count; j++)
+        {
+          transitionTableInitialization.Add(
+            $"{VAR_NAME_TRANSITION_TABLE}[{OUT_PREFIX_STATE}{states[i].Name}, {OUT_PREFIX_INPUT_SYMBOL}{inputSymbols[j].Name}]" +
+            $" := {OUT_PREFIX_STATE}{_recognizerStateMachine.TransitionTable[i][j].Name};");
+        }
+        transitionTableInitialization.Add("");
+      }
+      return transitionTableInitialization;
+    }
+
+    private static List<string> GetInputStringReading()
+    {
+      return new()
+      {
+        $"readln({VAR_NAME_INPUT_STRING});",
+        $"{VAR_NAME_INPUT_STRING_LENGTH} := Length({VAR_NAME_INPUT_STRING});"
+      };
+    }
+
+    private List<string> GetVariableInitialization()
+    {
+      StringBuilder finalStates = new();
+      foreach (MachineState state in _recognizerStateMachine.States)
+      {
+        if (state.IsFinalState)
+          finalStates.Append($"{OUT_PREFIX_STATE}{state}, ");
+      }
+
+      // удаление последней запятой с пробелом
+      if (finalStates.Length > 2)
+        finalStates.Remove(finalStates.Length - 2, 2);
+      return new()
+      {
+        $"{VAR_NAME_FINAL_STATES_SET} := [{finalStates}];",
+        $"{VAR_NAME_CURRENT_STATE} := {OUT_PREFIX_STATE}{_recognizerStateMachine.InitialState.Name};",
+        $"{VAR_NAME_COUNTER_I} := 1;"
+      };
+    }
+
+    private List<string> GetWhileLoopStatement()
+    {
+      List<string> loopStatement = new()
+      {
+        $"while {VAR_NAME_COUNTER_I} <= {VAR_NAME_INPUT_STRING_LENGTH} do",
+        "begin",
+        $"{VAR_NAME_SINGLE_CHAR} := {VAR_NAME_INPUT_STRING}[{VAR_NAME_COUNTER_I}];"
+      };
+      loopStatement.AddRange(GetIfStatements());
+      loopStatement.Add($"{VAR_NAME_CURRENT_STATE} := {VAR_NAME_TRANSITION_TABLE}[{VAR_NAME_CURRENT_STATE}, {VAR_NAME_SINGLE_CHAR_KIND}];");
+      loopStatement.Add($"{VAR_NAME_COUNTER_I} := {VAR_NAME_COUNTER_I} + 1;");
+      loopStatement.Add("end;");
+      return loopStatement;
+    }
+
+    private List<string> GetIfStatements()
+    {
+      List<string> ifStatements = new();
+      foreach (InputSymbol inputSymbol in _recognizerStateMachine.InputSymbols)
+      {
+        ifStatements.Add($"if {VAR_NAME_SINGLE_CHAR} in {REAL_INPUT_SYMBOLS_PREFIX}{inputSymbol.Name} then");
+        ifStatements.Add($"{VAR_NAME_SINGLE_CHAR_KIND} := {OUT_PREFIX_INPUT_SYMBOL}{inputSymbol.Name}");
+        ifStatements.Add("else");
+      }
+
+      // TODO обработать ошибку по-нормальному
+      ifStatements.Add($"{VAR_NAME_SINGLE_CHAR_KIND} := -1;");
+      return ifStatements;
+    }
+
+    private List<string> GetEndChecking()
+    {
+      return new()
+      {
+        $"if {VAR_NAME_CURRENT_STATE} in {VAR_NAME_FINAL_STATES_SET} then",
+        $"writeln(\'{MESSAGE_ACCEPTED}\')",
+        $"else",
+        $"writeln(\'{MESSAGE_REJECTED}\')"
+      };
     }
   }
 }

@@ -13,10 +13,19 @@ namespace RecognizerGenerator
 {
   public class ViewModel
   {
-    public ObservableCollection<InputSymbol> InputSymbols { get; set; } = new() { new("a"), new("b") };
+    public ObservableCollection<InputSymbol> InputSymbols { get; set; } = new()
+    {
+      new("a") { AcceptedCharactersExpression = "a-zA-Z_" },
+      new("b") { AcceptedCharactersExpression = "0-9" }
+    };
     public ObservableCollection<string> InputSymbolsNames { get; } = new();
 
-    public ObservableCollection<MachineState> States { get; set; } = new() { new("S"), new("A"), new("E") };
+    public ObservableCollection<MachineState> States { get; set; } = new()
+    {
+      new("S"),
+      new("A") { IsFinalState = true },
+      new("E")
+    };
     public ObservableCollection<string> StatesNames { get; } = new();
 
     public MachineState? InitialState { get; set; }
