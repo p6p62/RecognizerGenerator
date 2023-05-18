@@ -82,7 +82,8 @@ namespace RecognizerGenerator
       switch (e?.Action)
       {
         case NotifyCollectionChangedAction.Add:
-          TransitionTable.Insert(e.NewStartingIndex, new(new MachineState[InputSymbols.Count].Select(_ => new MachineState()).ToList()));
+          string defaultStateName = States.Count > 1 ? States[^2].Name : "";
+          TransitionTable.Insert(e.NewStartingIndex, new(new MachineState[InputSymbols.Count].Select(_ => new MachineState(defaultStateName)).ToList()));
           break;
         case NotifyCollectionChangedAction.Remove:
           TransitionTable.RemoveAt(e.OldStartingIndex);
@@ -101,7 +102,7 @@ namespace RecognizerGenerator
         case NotifyCollectionChangedAction.Add:
           foreach (ObservableCollection<MachineState> stateRow in TransitionTable)
             if (InputSymbols.Count > stateRow.Count)
-              stateRow.Insert(e.NewStartingIndex, new());
+              stateRow.Insert(e.NewStartingIndex, new(States.Last().Name));
           break;
         case NotifyCollectionChangedAction.Remove:
           foreach (ObservableCollection<MachineState> stateRow in TransitionTable)

@@ -65,7 +65,6 @@ namespace RecognizerGenerator
     /// <returns>Текст программы-распознавателя</returns>
     public string[] GenerateRecognizerCode()
     {
-      // TODO
       List<string> code = new() { GetRecognizerProgramName() };
       code.AddRange(GetConstantSection());
       code.Add("");
@@ -292,9 +291,15 @@ namespace RecognizerGenerator
         ifStatements.Add("else");
       }
 
-      // TODO обработать ошибку по-нормальному
       if (_isLastCharacterUniversal)
         ifStatements.Add($"{VAR_NAME_SINGLE_CHAR_KIND} := {OUT_PREFIX_INPUT_SYMBOL}{_recognizerStateMachine.InputSymbols.Last().Name};");
+      else
+      {
+        ifStatements.Add("begin");
+        ifStatements.Add($"writeln(\'{MESSAGE_REJECTED}\');");
+        ifStatements.Add("exit;");
+        ifStatements.Add("end;");
+      }
       return ifStatements;
     }
 
