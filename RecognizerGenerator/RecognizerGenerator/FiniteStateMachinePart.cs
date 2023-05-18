@@ -50,5 +50,10 @@ namespace RecognizerGenerator
       PropertyChanged?.Invoke(this, e);
       PropertyChangedCommon?.Invoke(this, e);
     }
+
+    public override string ToString()
+    {
+      return Name;
+    }
   }
 }

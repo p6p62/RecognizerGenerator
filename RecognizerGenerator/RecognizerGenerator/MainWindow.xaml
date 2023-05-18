@@ -22,16 +22,12 @@
             </ComboBox>
         </DataTemplate>
     </Window.Resources>
-    <Grid>
+    <Grid Margin="5">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <Button Name="GenerateButton" Content="Сгенерировать" Margin="5" Click="GenerateButton_Click"/>
-        </StackPanel>
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="*"/>
@@ -90,27 +86,37 @@
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Text="Таблица переходов автомата:"/>
                 <Grid Grid.Row="1">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="auto"/>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="auto"/>
                         <ColumnDefinition/>
+                        <ColumnDefinition Width="auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Row="1" Text="Исходное состояние" TextAlignment="Right">
-                        <TextBlock.LayoutTransform>
-                            <RotateTransform Angle="-90"/>
-                        </TextBlock.LayoutTransform>
-                    </TextBlock>
-                    <TextBlock Grid.Column="1" Text="Входной символ"/>
-                    <DataGrid Name="TransitionStatesDataGrid" Grid.Row="1" Grid.Column="1" CanUserReorderColumns="False"
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Row="1" Text="Исходное состояние" TextAlignment="Right">
+                            <TextBlock.LayoutTransform>
+                                <RotateTransform Angle="-90"/>
+                            </TextBlock.LayoutTransform>
+                        </TextBlock>
+                        <TextBlock Grid.Column="1" Text="Входной символ"/>
+                        <DataGrid Name="TransitionStatesDataGrid" Grid.Row="1" Grid.Column="1" CanUserReorderColumns="False"
                               SelectionUnit="Cell"
                               AutoGenerateColumns="True"
                               SelectionMode="Single"
@@ -118,7 +124,22 @@
                               dataGrid2D:ItemsSource.RowHeadersSource="{Binding StatesNames}"
                               dataGrid2D:ItemsSource.ColumnHeadersSource="{Binding InputSymbolsNames}"
                               dataGrid2D:Cell.Template="{DynamicResource DataTemplate_NameText}">
-                    </DataGrid>
+                        </DataGrid>
+                    </Grid>
+                    <StackPanel Grid.Column="1" Margin="5 0 0 0">
+                        <Button Name="GenerateButton" Content="Сгенерировать" Click="GenerateButton_Click"/>
+                        <Button Name="CopyButton" Content="В буфер обмена" Margin="0 5" Click="CopyButton_Click"/>
+                        <Button Name="ClearButton" Content="Очистить" Click="ClearButton_Click"/>
+                    </StackPanel>
+                </Grid>
+                <Grid Grid.Row="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="Сгенерированный код распознавателя:"/>
+                    <TextBox Grid.Row="1" Name="RecognizerOutputCodeTextBox" TextWrapping="Wrap"/>
                 </Grid>
             </Grid>
         </Grid>

@@ -34,6 +34,24 @@ namespace RecognizerGenerator
 
     private void GenerateButton_Click(object sender, RoutedEventArgs e)
     {
+      List<List<MachineState>> transitionTable = _dataContext.TransitionTable.Select(r => r.ToList()).ToList();
+      FiniteStateMachine recognizerFiniteStateMachine = new(_dataContext.States.ToList(),
+        _dataContext.InitialState ?? _dataContext.States.Last(), _dataContext.InputSymbols.ToList(), transitionTable);
+
+      CodeGeneratorToPascal generator = new(recognizerFiniteStateMachine);
+      string[] outputCode = generator.GenerateRecognizerCode();
+
+      RecognizerOutputCodeTextBox.Text = string.Join('\n', outputCode);
+    }
+
+    private void ClearButton_Click(object sender, RoutedEventArgs e)
+    {
+      RecognizerOutputCodeTextBox.Text = "";
+    }
+
+    private void CopyButton_Click(object sender, RoutedEventArgs e)
+    {
+      Clipboard.SetText(RecognizerOutputCodeTextBox.Text);
     }
   }
 }
