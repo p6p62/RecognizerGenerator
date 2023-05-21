@@ -142,7 +142,7 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Text="Сгенерированный код распознавателя:"/>
-                    <TextBox Grid.Row="1" Name="RecognizerOutputCodeTextBox" TextWrapping="Wrap"/>
+                    <TextBox Grid.Row="1" Name="RecognizerOutputCodeTextBox" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
                 </Grid>
             </Grid>
         </Grid>

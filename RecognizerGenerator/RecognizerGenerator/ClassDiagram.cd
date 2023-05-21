@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="RecognizerGenerator.FiniteStateMachinePart">
+    <Position X="6.5" Y="1.25" Width="2" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+      <Compartment Name="Events" Collapsed="true" />
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAIAgAAAAAAAAEAAAAAAQAgAAAAABIAAAAAAAAAAA=</HashCode>
+      <FileName>FiniteStateMachinePart.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="RecognizerGenerator.InputSymbol">
+    <Position X="5.5" Y="4" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAA=</HashCode>
+      <FileName>InputSymbol.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RecognizerGenerator.MachineState">
+    <Position X="8.25" Y="4" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAgAAAAAAAAAAAAEAAAAAAAAAAAAAA=</HashCode>
+      <FileName>MachineState.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RecognizerGenerator.FiniteStateMachine">
+    <Position X="10" Y="1.25" Width="2" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAABAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAABAAABAA=</HashCode>
+      <FileName>FiniteStateMachine.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
