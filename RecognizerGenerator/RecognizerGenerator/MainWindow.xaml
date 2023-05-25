@@ -126,6 +126,7 @@
                               dataGrid2D:ItemsSource.RowsSource="{Binding TransitionTable}"
                               dataGrid2D:ItemsSource.RowHeadersSource="{Binding StatesNames}"
                               dataGrid2D:ItemsSource.ColumnHeadersSource="{Binding InputSymbolsNames}"
+                              dataGrid2D:Cell.EditingTemplate="{DynamicResource DataTemplate_StateChoose}"
                               dataGrid2D:Cell.Template="{DynamicResource DataTemplate_NameText}">
                         </DataGrid>
                     </Grid>

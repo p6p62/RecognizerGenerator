@@ -28,7 +28,6 @@ namespace RecognizerGenerator
     public MainWindow()
     {
       InitializeComponent();
-      TransitionStatesDataGrid.SetEditingTemplate((DataTemplate?)Resources["DataTemplate_StateChoose"]);
       _dataContext = (ViewModel)DataContext;
     }
 

@@ -61,20 +61,16 @@ namespace RecognizerGenerator
     private void UpdateSymbols(object? sender, NotifyCollectionChangedEventArgs? e)
     {
       ResizeInputSymbolsColumns(sender, e);
-      InputSymbolsNames.Clear();
-      foreach (InputSymbol symbol in InputSymbols)
-        InputSymbolsNames.Add(symbol.Name);
+      for (int i = 0; i < InputSymbols.Count; i++)
+        InputSymbolsNames[i] = InputSymbols[i].Name;
     }
 
     private void UpdateStates(object? sender, NotifyCollectionChangedEventArgs? e)
     {
       ResizeStateRows(sender, e);
-      if (StatesNames.Count != States.Count || StatesNames.Zip(States.Select(s => s.Name)).Any(t => t.First != t.Second))
-      {
-        StatesNames.Clear();
-        foreach (MachineState state in States)
-          StatesNames.Add(state.Name);
-      }
+      if (StatesNames.Zip(States.Select(s => s.Name)).Any(t => t.First != t.Second))
+        for (int i = 0; i < States.Count; i++)
+          StatesNames[i] = States[i].Name;
     }
 
     private void ResizeStateRows(object? sender, NotifyCollectionChangedEventArgs? e)
@@ -82,11 +78,13 @@ namespace RecognizerGenerator
       switch (e?.Action)
       {
         case NotifyCollectionChangedAction.Add:
+          StatesNames.Add("");
           string defaultStateName = States.Count > 1 ? States[^2].Name : "";
           TransitionTable.Insert(e.NewStartingIndex, new(new MachineState[InputSymbols.Count].Select(_ => new MachineState(defaultStateName)).ToList()));
           break;
         case NotifyCollectionChangedAction.Remove:
           TransitionTable.RemoveAt(e.OldStartingIndex);
+          StatesNames.RemoveAt(e.OldStartingIndex);
           break;
         case NotifyCollectionChangedAction.Replace:
         case NotifyCollectionChangedAction.Move:
@@ -100,6 +98,7 @@ namespace RecognizerGenerator
       switch (e?.Action)
       {
         case NotifyCollectionChangedAction.Add:
+          InputSymbolsNames.Add("");
           foreach (ObservableCollection<MachineState> stateRow in TransitionTable)
             if (InputSymbols.Count > stateRow.Count)
               stateRow.Insert(e.NewStartingIndex, new(States.Last().Name));
@@ -107,6 +106,7 @@ namespace RecognizerGenerator
         case NotifyCollectionChangedAction.Remove:
           foreach (ObservableCollection<MachineState> stateRow in TransitionTable)
             stateRow.RemoveAt(e.OldStartingIndex);
+          InputSymbolsNames.RemoveAt(e.OldStartingIndex);
           break;
         case NotifyCollectionChangedAction.Replace:
         case NotifyCollectionChangedAction.Move:
