@@ -84,6 +84,7 @@ namespace RecognizerGenerator
     private List<string> GetConstantSection()
     {
       List<string> constantSection = new() { "const" };
+      constantSection.Add("{Состояния автомата}");
       constantSection.AddRange(GetStatesConstants());
       constantSection.Add("");
       constantSection.AddRange(GetInputSymbolsConstants());
