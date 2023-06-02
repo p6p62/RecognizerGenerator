@@ -83,8 +83,11 @@ namespace RecognizerGenerator
 
     private List<string> GetConstantSection()
     {
-      List<string> constantSection = new() { "const" };
-      constantSection.Add("{Состояния автомата}");
+      List<string> constantSection = new()
+      {
+        "const",
+        "{Состояния автомата}"
+      };
       constantSection.AddRange(GetStatesConstants());
       constantSection.Add("");
       constantSection.Add("{Входные символы автомата}");
@@ -154,10 +157,10 @@ namespace RecognizerGenerator
         $"{VAR_NAME_SINGLE_CHAR_KIND} : {TYPE_NAME_INPUT_SYMBOL};",
         "",
         "{Конечные состояния автомата}",
-        $"{VAR_NAME_FINAL_STATES_SET} : set of {TYPE_NAME_STATE};"
+        $"{VAR_NAME_FINAL_STATES_SET} : set of {TYPE_NAME_STATE};",
+        "",
+        "{Множества для сопоставления реальных поступающих символов их типам}"
       };
-      variableSection.Add("");
-      variableSection.Add("{Множества для сопоставления реальных поступающих символов их типам}");
       variableSection.AddRange(_recognizerStateMachine.InputSymbols.Select(
         s => $"{REAL_INPUT_SYMBOLS_PREFIX}{s} : set of char;"));
       return variableSection;
@@ -175,8 +178,7 @@ namespace RecognizerGenerator
 
     private List<string> GetDataInitializationBlock()
     {
-      List<string> dataInitialization = new();
-      dataInitialization.Add("{Определение соответствия реальных символов входным символам автомата}");
+      List<string> dataInitialization = new() { "{Определение соответствия реальных символов входным символам автомата}" };
       dataInitialization.AddRange(GetInputSymbolSets());
       dataInitialization.Add("");
       dataInitialization.Add("{Заполнение таблицы переходов автомата}");
@@ -312,7 +314,10 @@ namespace RecognizerGenerator
         : _recognizerStateMachine.InputSymbols;
       foreach (InputSymbol inputSymbol in symbolsInConditions)
       {
-        ifStatements.Add($"if {VAR_NAME_SINGLE_CHAR} in {REAL_INPUT_SYMBOLS_PREFIX}{inputSymbol.Name} then");
+        if (inputSymbol.Excusion)
+          ifStatements.Add($"if not ({VAR_NAME_SINGLE_CHAR} in {REAL_INPUT_SYMBOLS_PREFIX}{inputSymbol.Name}) then");
+        else
+          ifStatements.Add($"if {VAR_NAME_SINGLE_CHAR} in {REAL_INPUT_SYMBOLS_PREFIX}{inputSymbol.Name} then");
         ifStatements.Add($"{VAR_NAME_SINGLE_CHAR_KIND} := {OUT_PREFIX_INPUT_SYMBOL}{inputSymbol.Name}");
         ifStatements.Add("else");
       }

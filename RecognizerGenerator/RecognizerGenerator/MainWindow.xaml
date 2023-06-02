@@ -79,6 +79,7 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Входные символы" Binding="{Binding Name}"/>
                             <DataGridTextColumn Header="Диапазоны" Binding="{Binding AcceptedCharactersExpression}"/>
+                            <DataGridCheckBoxColumn Header="Исключение" Binding="{Binding Excusion}"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </ScrollViewer>

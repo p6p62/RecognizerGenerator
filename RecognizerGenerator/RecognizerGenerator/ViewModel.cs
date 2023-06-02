@@ -17,7 +17,7 @@ namespace RecognizerGenerator
     {
       new("a") { AcceptedCharactersExpression = "a-zA-Z_" },
       new("b") { AcceptedCharactersExpression = "0-9" },
-      new("x")
+      new("x") { AcceptedCharactersExpression = "a-zA-Z_0-9", Excusion = true }
     };
     public ObservableCollection<string> InputSymbolsNames { get; } = new();
 
@@ -38,7 +38,7 @@ namespace RecognizerGenerator
       new() { new("E"), new("E"), new("E") },
     };
 
-    public bool IsLastCharacterUniversal { get; set; } = true;
+    public bool IsLastCharacterUniversal { get; set; } = false;
 
     public ViewModel()
     {
