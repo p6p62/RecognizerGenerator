@@ -135,16 +135,19 @@
                         <Button Name="GenerateButton" Content="Сгенерировать" Click="GenerateButton_Click"/>
                         <Button Name="CopyButton" Content="В буфер обмена" Margin="0 5" Click="CopyButton_Click"/>
                         <Button Name="ClearButton" Content="Очистить" Click="ClearButton_Click"/>
+                        <Button Name="GraphButton" Content="Построить граф переходов" Margin="0 5" Click="GraphButton_Click"/>
                     </StackPanel>
                 </Grid>
                 <Grid Grid.Row="2">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto"/>
                         <RowDefinition/>
+                        <RowDefinition/>
                     </Grid.RowDefinitions>
 
                     <TextBlock Text="Сгенерированный код распознавателя:"/>
                     <TextBox Grid.Row="1" Name="RecognizerOutputCodeTextBox" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+                    <DockPanel Grid.Row="2" Name="TransitionsGraphDockPanel" ClipToBounds="True"/>
                 </Grid>
             </Grid>
         </Grid>
