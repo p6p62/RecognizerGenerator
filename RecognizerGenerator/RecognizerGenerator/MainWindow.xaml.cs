@@ -37,14 +37,23 @@ namespace RecognizerGenerator
 
     private void GenerateButton_Click(object sender, RoutedEventArgs e)
     {
-      List<List<MachineState>> transitionTable = _dataContext.TransitionTable.Select(r => r.ToList()).ToList();
-      FiniteStateMachine recognizerFiniteStateMachine = new(_dataContext.States.ToList(),
-        _dataContext.InitialState ?? _dataContext.States.Last(), _dataContext.InputSymbols.ToList(), transitionTable);
+      if (_dataContext.InitialState is not null)
+      {
+        if (_dataContext.States.Any(s => s.IsFinalState))
+        {
+          List<List<MachineState>> transitionTable = _dataContext.TransitionTable.Select(r => r.ToList()).ToList();
+          FiniteStateMachine recognizerFiniteStateMachine = new(_dataContext.States.ToList(), _dataContext.InitialState, _dataContext.InputSymbols.ToList(), transitionTable);
 
-      CodeGeneratorToPascal generator = new(recognizerFiniteStateMachine, _dataContext.IsLastCharacterUniversal);
-      string[] outputCode = generator.GenerateRecognizerCode();
+          CodeGeneratorToPascal generator = new(recognizerFiniteStateMachine, _dataContext.IsLastCharacterUniversal);
+          string[] outputCode = generator.GenerateRecognizerCode();
 
-      RecognizerOutputCodeTextBox.Text = string.Join('\n', outputCode);
+          RecognizerOutputCodeTextBox.Text = string.Join('\n', outputCode);
+        }
+        else
+          MessageBox.Show("Множество конечных состояний автомата пустое", "Ошибка");
+      }
+      else
+        MessageBox.Show("Не задано начальное состояние автомата", "Ошибка");
     }
 
     private void ClearButton_Click(object sender, RoutedEventArgs e)

@@ -75,7 +75,7 @@
                     <CheckBox Content="Последний символ - ни один из предыдущих" IsChecked="{Binding IsLastCharacterUniversal}"/>
                 </StackPanel>
                 <ScrollViewer Grid.Row="3">
-                    <DataGrid x:Name="InputSymbolsDataGrid" ItemsSource="{Binding InputSymbols}" AutoGenerateColumns="False">
+                    <DataGrid x:Name="InputSymbolsDataGrid" ItemsSource="{Binding InputSymbols}" AutoGenerateColumns="False" CanUserSortColumns="False">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Входные символы" Binding="{Binding Name}"/>
                             <DataGridTextColumn Header="Диапазоны" Binding="{Binding AcceptedCharactersExpression}"/>
