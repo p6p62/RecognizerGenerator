@@ -26,6 +26,7 @@ namespace RecognizerGenerator
   public partial class MainWindow : Window
   {
     private readonly ViewModel _dataContext;
+    private TransitionsGraphWindow? _transitionsGraphWindow;
 
     public MainWindow()
     {
@@ -58,9 +59,10 @@ namespace RecognizerGenerator
 
     private void GraphButton_Click(object sender, RoutedEventArgs e)
     {
-      TransitionsGraphWindow graphWindow = new();
-      graphWindow.Show();
-      graphWindow.ShowGraph(_dataContext);
+      if (_transitionsGraphWindow == null || !_transitionsGraphWindow.IsLoaded)
+        _transitionsGraphWindow = new();
+      _transitionsGraphWindow.Show();
+      _transitionsGraphWindow.ShowGraph(_dataContext);
     }
   }
 }

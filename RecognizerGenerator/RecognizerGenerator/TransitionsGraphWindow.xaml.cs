@@ -33,6 +33,9 @@ namespace RecognizerGenerator
 
     public void ShowGraph(ViewModel dataContext)
     {
+      _transitionsGraph.Edges.ToList().ForEach(e => _transitionsGraph.RemoveEdge(e));
+      _transitionsGraph.Nodes.ToList().ForEach(n => _transitionsGraph.RemoveNode(n));
+
       // добавление состояний
       foreach (MachineState state in dataContext.States)
         _transitionsGraph.AddNode(state.Name).Attr.Shape = Microsoft.Msagl.Drawing.Shape.Circle;
