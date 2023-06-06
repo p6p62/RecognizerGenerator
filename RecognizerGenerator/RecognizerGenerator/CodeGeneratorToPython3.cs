@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RecognizerGenerator
 {
-  internal class CodeGeneratorToPascal
+  internal class CodeGeneratorToPython3
   {
     #region Константы для настройки имён в генерации выходной программы
     #region Префиксы для констант состояний и входных символов
@@ -20,24 +20,21 @@ namespace RecognizerGenerator
     public const string CONSTANT_NAME_INPUT_SYMBOLS_COUNT = "input_symbols_count";
     #endregion
 
-    #region Имена типов в секции типов (type)
-    public const string TYPE_NAME_STATE = "TState";
-    public const string TYPE_NAME_INPUT_SYMBOL = "TInputSymbol";
-    #endregion
-
     #region Имена префиксов для переменных под множества символов из реального входного потока
-    public const string REAL_INPUT_SYMBOLS_PREFIX = "InputCharSet_";
+    public const string REAL_INPUT_SYMBOLS_PREFIX = "input_char_set_";
     #endregion
 
-    #region Имена переменных в секции переменных (var)
-    public const string VAR_NAME_CURRENT_STATE = "CurrentState";
-    public const string VAR_NAME_INPUT_STRING_LENGTH = "InputStringLength";
-    public const string VAR_NAME_COUNTER_I = "i";
-    public const string VAR_NAME_TRANSITION_TABLE = "TransitionTable";
-    public const string VAR_NAME_INPUT_STRING = "InputString";
-    public const string VAR_NAME_SINGLE_CHAR = "SingleChar";
-    public const string VAR_NAME_SINGLE_CHAR_KIND = "InputSymbolKind";
-    public const string VAR_NAME_FINAL_STATES_SET = "FinalStates";
+    #region Название функции для получения диапазона символов
+    private const string FUNCTION_CHAR_RANGE_NAME = "char_range";
+    #endregion
+
+    #region Имена переменных в секции переменных
+    public const string VAR_NAME_CURRENT_STATE = "current_state";
+    public const string VAR_NAME_TRANSITION_TABLE = "transition_table";
+    public const string VAR_NAME_INPUT_STRING = "input_string";
+    public const string VAR_NAME_SINGLE_CHAR = "single_char";
+    public const string VAR_NAME_SINGLE_CHAR_KIND = "input_symbol_kind";
+    public const string VAR_NAME_FINAL_STATES_SET = "final_states";
     #endregion
 
     #region Сообщения программы
@@ -49,12 +46,15 @@ namespace RecognizerGenerator
     private readonly FiniteStateMachine _recognizerStateMachine;
     private readonly bool _isLastCharacterUniversal;
 
-    public string RecognizerProgramName { get; set; } = "recognizer";
-
-    public CodeGeneratorToPascal(FiniteStateMachine recognizerStateMachine, bool isLastCharacterUniversal)
+    public CodeGeneratorToPython3(FiniteStateMachine recognizerStateMachine, bool isLastCharacterUniversal)
     {
       _recognizerStateMachine = recognizerStateMachine;
       _isLastCharacterUniversal = isLastCharacterUniversal;
+    }
+
+    private static string Tab(int n = 4)
+    {
+      return new(' ', n);
     }
 
     /// <summary>
@@ -63,35 +63,29 @@ namespace RecognizerGenerator
     /// <returns>Текст программы-распознавателя</returns>
     public string[] GenerateRecognizerCode()
     {
-      List<string> code = new() { GetRecognizerProgramName() };
+      List<string> code = new();
       code.AddRange(GetConstantSection());
       code.Add("");
-      code.AddRange(GetTypeSection());
       code.Add("");
-      code.AddRange(GetVariableSection());
+      code.AddRange(GetCharRangeFunctionSection());
+      code.Add("");
       code.Add("");
       code.AddRange(GetProgramStatements());
       return code.ToArray();
-    }
-
-    private string GetRecognizerProgramName()
-    {
-      return $"program {RecognizerProgramName};";
     }
 
     private List<string> GetConstantSection()
     {
       List<string> constantSection = new()
       {
-        "const",
-        "{Состояния автомата}"
+        "# Состояния автомата"
       };
       constantSection.AddRange(GetStatesConstants());
       constantSection.Add("");
-      constantSection.Add("{Входные символы автомата}");
+      constantSection.Add("# Входные символы автомата");
       constantSection.AddRange(GetInputSymbolsConstants());
       constantSection.Add("");
-      constantSection.Add("{Количество строк (состояний) и столбцов (входных символов) таблицы переходов}");
+      constantSection.Add("# Количество строк (состояний) и столбцов (входных символов) таблицы переходов");
       constantSection.AddRange(GetQuantitativeConstants());
       return constantSection;
     }
@@ -100,7 +94,7 @@ namespace RecognizerGenerator
     {
       int counter = 0;
       return _recognizerStateMachine.States.Select(
-        s => $"{OUT_PREFIX_STATE}{s} = {counter++};")
+        s => $"{OUT_PREFIX_STATE}{s} = {counter++}")
         .ToList();
     }
 
@@ -108,7 +102,7 @@ namespace RecognizerGenerator
     {
       int counter = 0;
       return _recognizerStateMachine.InputSymbols.Select(
-        s => $"{OUT_PREFIX_INPUT_SYMBOL}{s} = {counter++};")
+        s => $"{OUT_PREFIX_INPUT_SYMBOL}{s} = {counter++}")
         .ToList();
     }
 
@@ -116,72 +110,40 @@ namespace RecognizerGenerator
     {
       return new List<string>()
       {
-        $"{CONSTANT_NAME_STATES_COUNT} = {_recognizerStateMachine.States.Count};",
-        $"{CONSTANT_NAME_INPUT_SYMBOLS_COUNT} = {_recognizerStateMachine.InputSymbols.Count};"
+        $"{CONSTANT_NAME_STATES_COUNT} = {_recognizerStateMachine.States.Count}",
+        $"{CONSTANT_NAME_INPUT_SYMBOLS_COUNT} = {_recognizerStateMachine.InputSymbols.Count}"
       };
     }
 
-    private List<string> GetTypeSection()
+    private static List<string> GetCharRangeFunctionSection()
     {
-      List<MachineState> states = _recognizerStateMachine.States;
-      List<InputSymbol> inputSymbols = _recognizerStateMachine.InputSymbols;
       return new List<string>()
       {
-        "type",
-        "{Тип состояния автомата}",
-        $"{TYPE_NAME_STATE} = {OUT_PREFIX_STATE}{states[0]}..{OUT_PREFIX_STATE}{states.Last()};",
-        "",
-        "{Тип входного символа автомата}",
-        $"{TYPE_NAME_INPUT_SYMBOL} = {OUT_PREFIX_INPUT_SYMBOL}{inputSymbols[0]}..{OUT_PREFIX_INPUT_SYMBOL}{inputSymbols.Last()};"
+        $"def {FUNCTION_CHAR_RANGE_NAME}(c1: str, c2: str):",
+        $"{Tab()}return {{chr(c) for c in range(ord(c1), ord(c2) + 1)}}"
       };
-    }
-
-    private List<string> GetVariableSection()
-    {
-      List<string> variableSection = new()
-      {
-        "var",
-        "{Текущее состояние автомата в момент работы}",
-        $"{VAR_NAME_CURRENT_STATE} : {TYPE_NAME_STATE};",
-        $"{VAR_NAME_INPUT_STRING_LENGTH} : integer;",
-        $"{VAR_NAME_COUNTER_I} : integer;",
-        $"{VAR_NAME_TRANSITION_TABLE} : array[0..{CONSTANT_NAME_STATES_COUNT} - 1, 0..{CONSTANT_NAME_INPUT_SYMBOLS_COUNT} - 1] of {TYPE_NAME_STATE};",
-        $"{VAR_NAME_INPUT_STRING} : string;",
-        "",
-        "{Обрабатываемый символ из входного потока}",
-        $"{VAR_NAME_SINGLE_CHAR} : char;",
-        "",
-        "{Тип обрабатываемого символа}",
-        $"{VAR_NAME_SINGLE_CHAR_KIND} : {TYPE_NAME_INPUT_SYMBOL};",
-        "",
-        "{Конечные состояния автомата}",
-        $"{VAR_NAME_FINAL_STATES_SET} : set of {TYPE_NAME_STATE};",
-        "",
-        "{Множества для сопоставления реальных поступающих символов их типам}"
-      };
-      variableSection.AddRange(_recognizerStateMachine.InputSymbols.Select(
-        s => $"{REAL_INPUT_SYMBOLS_PREFIX}{s} : set of char;"));
-      return variableSection;
     }
 
     private List<string> GetProgramStatements()
     {
-      List<string> statements = new() { "begin" };
+      List<string> statements = new() { "def recognizer():" };
       statements.AddRange(GetDataInitializationBlock());
-      statements.AddRange(GetWhileLoopStatement());
+      statements.AddRange(GetLoopStatement());
       statements.AddRange(GetEndChecking());
-      statements.Add("end.");
+      statements.Add("");
+      statements.Add("");
+      statements.Add("recognizer()");
       return statements;
     }
 
     private List<string> GetDataInitializationBlock()
     {
-      List<string> dataInitialization = new() { "{Определение соответствия реальных символов входным символам автомата}" };
+      List<string> dataInitialization = new() { $"{Tab()}# Определение соответствия реальных символов входным символам автомата" };
       dataInitialization.AddRange(GetInputSymbolSets());
       dataInitialization.Add("");
-      dataInitialization.Add("{Заполнение таблицы переходов автомата}");
+      dataInitialization.Add($"{Tab()}# Заполнение таблицы переходов автомата");
       dataInitialization.AddRange(GetTransitionTableInitialization());
-      dataInitialization.Add("{Считывание входной строки}");
+      dataInitialization.Add($"{Tab()}# Считывание входной строки");
       dataInitialization.AddRange(GetInputStringReading());
       dataInitialization.Add("");
       dataInitialization.AddRange(GetVariableInitialization());
@@ -196,9 +158,9 @@ namespace RecognizerGenerator
       foreach (InputSymbol inputSymbol in _recognizerStateMachine.InputSymbols)
       {
         StringBuilder symbolsSetInitializationExpression = new(
-          $"{REAL_INPUT_SYMBOLS_PREFIX}{inputSymbol.Name} := [");
+          $"{Tab()}{REAL_INPUT_SYMBOLS_PREFIX}{inputSymbol.Name} = {{");
         symbolsSetInitializationExpression.Append(GetRealCharactersSetExpression(inputSymbol.AcceptedCharactersExpression));
-        symbolsSetInitializationExpression.Append("];");
+        symbolsSetInitializationExpression.Append('}');
         symbolSets.Add(symbolsSetInitializationExpression.ToString());
       }
       return symbolSets;
@@ -224,7 +186,7 @@ namespace RecognizerGenerator
         {
           string start = match.Groups["rangeStart"].Value;
           string end = match.Groups["rangeEnd"].Value;
-          setInitializationExpression.Append($"\'{start}\'..\'{end}\', ");
+          setInitializationExpression.Append($"*{FUNCTION_CHAR_RANGE_NAME}(\'{start}\', \'{end}\'), ");
         }
       }
 
@@ -238,14 +200,17 @@ namespace RecognizerGenerator
     {
       List<MachineState> states = _recognizerStateMachine.States;
       List<InputSymbol> inputSymbols = _recognizerStateMachine.InputSymbols;
-      List<string> transitionTableInitialization = new();
+      List<string> transitionTableInitialization = new()
+      {
+        $"{Tab()}{VAR_NAME_TRANSITION_TABLE} = tuple([0 for _ in range({CONSTANT_NAME_INPUT_SYMBOLS_COUNT})] for _ in range({CONSTANT_NAME_STATES_COUNT}))"
+      };
       for (int i = 0; i < states.Count; i++)
       {
         for (int j = 0; j < inputSymbols.Count; j++)
         {
           transitionTableInitialization.Add(
-            $"{VAR_NAME_TRANSITION_TABLE}[{OUT_PREFIX_STATE}{states[i].Name}, {OUT_PREFIX_INPUT_SYMBOL}{inputSymbols[j].Name}]" +
-            $" := {OUT_PREFIX_STATE}{_recognizerStateMachine.TransitionTable[i][j].Name};");
+            $"{Tab()}{VAR_NAME_TRANSITION_TABLE}[{OUT_PREFIX_STATE}{states[i].Name}][{OUT_PREFIX_INPUT_SYMBOL}{inputSymbols[j].Name}]" +
+            $" = {OUT_PREFIX_STATE}{_recognizerStateMachine.TransitionTable[i][j].Name}");
         }
         transitionTableInitialization.Add("");
       }
@@ -256,8 +221,7 @@ namespace RecognizerGenerator
     {
       return new()
       {
-        $"readln({VAR_NAME_INPUT_STRING});",
-        $"{VAR_NAME_INPUT_STRING_LENGTH} := Length({VAR_NAME_INPUT_STRING});"
+        $"{Tab()}{VAR_NAME_INPUT_STRING} = input()"
       };
     }
 
@@ -275,32 +239,26 @@ namespace RecognizerGenerator
         finalStates.Remove(finalStates.Length - 2, 2);
       return new()
       {
-        "{Определение конечных состояний}",
-        $"{VAR_NAME_FINAL_STATES_SET} := [{finalStates}];",
+        $"{Tab()}# Определение конечных состояний",
+        $"{Tab()}{VAR_NAME_FINAL_STATES_SET} = {{{finalStates}}}",
         "",
-        "{Установка автомата в начальное состояние}",
-        $"{VAR_NAME_CURRENT_STATE} := {OUT_PREFIX_STATE}{_recognizerStateMachine.InitialState.Name};",
-        $"{VAR_NAME_COUNTER_I} := 1;"
+        $"{Tab()}# Установка автомата в начальное состояние",
+        $"{Tab()}{VAR_NAME_CURRENT_STATE} = {OUT_PREFIX_STATE}{_recognizerStateMachine.InitialState.Name}"
       };
     }
 
-    private List<string> GetWhileLoopStatement()
+    private List<string> GetLoopStatement()
     {
       List<string> loopStatement = new()
       {
         "",
-        "{Пока в строке не кончились символы}",
-        $"while {VAR_NAME_COUNTER_I} <= {VAR_NAME_INPUT_STRING_LENGTH} do",
-        "begin",
-        "{Взятие очередного символа и определение его типа}",
-        $"{VAR_NAME_SINGLE_CHAR} := {VAR_NAME_INPUT_STRING}[{VAR_NAME_COUNTER_I}];"
+        $"{Tab()}for {VAR_NAME_SINGLE_CHAR} in {VAR_NAME_INPUT_STRING}:",
+        $"{Tab()}{Tab()}# Взятие очередного символа и определение его типа"
       };
       loopStatement.AddRange(GetIfStatements());
       loopStatement.Add("");
-      loopStatement.Add("{Переход автомата в новое состояние и смещение на следующий символ}");
-      loopStatement.Add($"{VAR_NAME_CURRENT_STATE} := {VAR_NAME_TRANSITION_TABLE}[{VAR_NAME_CURRENT_STATE}, {VAR_NAME_SINGLE_CHAR_KIND}];");
-      loopStatement.Add($"{VAR_NAME_COUNTER_I} := {VAR_NAME_COUNTER_I} + 1;");
-      loopStatement.Add("end;");
+      loopStatement.Add($"{Tab()}{Tab()}# Переход автомата в новое состояние и смещение на следующий символ");
+      loopStatement.Add($"{Tab()}{Tab()}{VAR_NAME_CURRENT_STATE} = {VAR_NAME_TRANSITION_TABLE}[{VAR_NAME_CURRENT_STATE}][{VAR_NAME_SINGLE_CHAR_KIND}]");
       return loopStatement;
     }
 
@@ -310,24 +268,25 @@ namespace RecognizerGenerator
       List<InputSymbol> symbolsInConditions = _isLastCharacterUniversal
         ? _recognizerStateMachine.InputSymbols.Take(_recognizerStateMachine.InputSymbols.Count - 1).ToList()
         : _recognizerStateMachine.InputSymbols;
+      int counter = 0;
       foreach (InputSymbol inputSymbol in symbolsInConditions)
       {
+        StringBuilder expr = counter++ > 0 ? new($"{Tab()}{Tab()}elif ") : new($"{Tab()}{Tab()}if ");
         if (inputSymbol.Excusion)
-          ifStatements.Add($"if not ({VAR_NAME_SINGLE_CHAR} in {REAL_INPUT_SYMBOLS_PREFIX}{inputSymbol.Name}) then");
+          expr.Append($"not {VAR_NAME_SINGLE_CHAR} in {REAL_INPUT_SYMBOLS_PREFIX}{inputSymbol.Name}:");
         else
-          ifStatements.Add($"if {VAR_NAME_SINGLE_CHAR} in {REAL_INPUT_SYMBOLS_PREFIX}{inputSymbol.Name} then");
-        ifStatements.Add($"{VAR_NAME_SINGLE_CHAR_KIND} := {OUT_PREFIX_INPUT_SYMBOL}{inputSymbol.Name}");
-        ifStatements.Add("else");
+          expr.Append($"{VAR_NAME_SINGLE_CHAR} in {REAL_INPUT_SYMBOLS_PREFIX}{inputSymbol.Name}:");
+        ifStatements.Add(expr.ToString());
+        ifStatements.Add($"{Tab()}{Tab()}{Tab()}{VAR_NAME_SINGLE_CHAR_KIND} = {OUT_PREFIX_INPUT_SYMBOL}{inputSymbol.Name}");
       }
+      ifStatements.Add($"{Tab()}{Tab()}else:");
 
       if (_isLastCharacterUniversal)
-        ifStatements.Add($"{VAR_NAME_SINGLE_CHAR_KIND} := {OUT_PREFIX_INPUT_SYMBOL}{_recognizerStateMachine.InputSymbols.Last().Name};");
+        ifStatements.Add($"{Tab()}{Tab()}{Tab()}{VAR_NAME_SINGLE_CHAR_KIND} = {OUT_PREFIX_INPUT_SYMBOL}{_recognizerStateMachine.InputSymbols.Last().Name}");
       else
       {
-        ifStatements.Add("begin");
-        ifStatements.Add($"writeln(\'{MESSAGE_REJECTED}\');");
-        ifStatements.Add("exit;");
-        ifStatements.Add("end;");
+        ifStatements.Add($"{Tab()}{Tab()}{Tab()}print(\'{MESSAGE_REJECTED}\')");
+        ifStatements.Add($"{Tab()}{Tab()}{Tab()}return");
       }
       return ifStatements;
     }
@@ -337,11 +296,11 @@ namespace RecognizerGenerator
       return new()
       {
         "",
-        "{Вывод результата}",
-        $"if {VAR_NAME_CURRENT_STATE} in {VAR_NAME_FINAL_STATES_SET} then",
-        $"writeln(\'{MESSAGE_ACCEPTED}\')",
-        $"else",
-        $"writeln(\'{MESSAGE_REJECTED}\')"
+        $"{Tab()}# Вывод результата",
+        $"{Tab()}if {VAR_NAME_CURRENT_STATE} in {VAR_NAME_FINAL_STATES_SET}:",
+        $"{Tab()}{Tab()}print(\'{MESSAGE_ACCEPTED}\')",
+        $"{Tab()}else:",
+        $"{Tab()}{Tab()}print(\'{MESSAGE_REJECTED}\')"
       };
     }
   }

@@ -44,8 +44,18 @@ namespace RecognizerGenerator
           List<List<MachineState>> transitionTable = _dataContext.TransitionTable.Select(r => r.ToList()).ToList();
           FiniteStateMachine recognizerFiniteStateMachine = new(_dataContext.States.ToList(), _dataContext.InitialState, _dataContext.InputSymbols.ToList(), transitionTable);
 
-          CodeGeneratorToPascal generator = new(recognizerFiniteStateMachine, _dataContext.IsLastCharacterUniversal);
-          string[] outputCode = generator.GenerateRecognizerCode();
+          string[] outputCode = Array.Empty<string>();
+          switch (OutputLanguageComboBox.SelectedIndex)
+          {
+            case 0:
+              CodeGeneratorToPascal pascalGenerator = new(recognizerFiniteStateMachine, _dataContext.IsLastCharacterUniversal);
+              outputCode = pascalGenerator.GenerateRecognizerCode();
+              break;
+            case 1:
+              CodeGeneratorToPython3 pythonGenerator = new(recognizerFiniteStateMachine, _dataContext.IsLastCharacterUniversal);
+              outputCode = pythonGenerator.GenerateRecognizerCode();
+              break;
+          }
 
           RecognizerOutputCodeTextBox.Text = string.Join('\n', outputCode);
         }

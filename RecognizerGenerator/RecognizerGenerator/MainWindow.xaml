@@ -132,6 +132,10 @@
                         </DataGrid>
                     </Grid>
                     <StackPanel Grid.Column="1" Margin="5 0 0 0">
+                        <ComboBox Name="OutputLanguageComboBox">
+                            <ComboBoxItem IsSelected="True">Pascal</ComboBoxItem>
+                            <ComboBoxItem>Python</ComboBoxItem>
+                        </ComboBox>
                         <Button Name="GenerateButton" Content="Сгенерировать" Click="GenerateButton_Click"/>
                         <Button Name="CopyButton" Content="В буфер обмена" Margin="0 5" Click="CopyButton_Click"/>
                         <Button Name="ClearButton" Content="Очистить" Click="ClearButton_Click"/>
