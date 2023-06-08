@@ -1,0 +1,28 @@
+@startuml Диаграмма классов конечного автомата
+hide circle
+
+class InputSymbol {
+    AcceptedCharactersExpression : string
+    Exclusion : bool
+}
+
+class MachineState {
+    IsFinalState : bool
+}
+
+class FiniteStateMachine {
+    States
+    InitialState
+    InputSymbols
+    TransitionTable
+}
+
+class FiniteStateMachinePart {
+    Name : string
+}
+
+FiniteStateMachinePart <|-- MachineState
+FiniteStateMachinePart <|-- InputSymbol
+
+FiniteStateMachinePart --o FiniteStateMachine
+@enduml

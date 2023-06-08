@@ -1,0 +1,36 @@
+@startuml Варианты использования
+
+left to right direction
+
+actor Пользователь as User
+
+rectangle "ПО для автоматизации создания конечных распознавателей регулярного языка" as App {
+    usecase "Выбор выходного языка" as UC1
+    usecase "Ввод параметров конечного автомата" as UC2
+    usecase "Ввод состояний" as UCstate
+    usecase "Задание начального состояния" as UCinitial_state
+    usecase "Указание конечных состояний" as UCfinal_states
+    usecase "Ввод входных символов" as UCsymbol
+    usecase "Ввод подходящих реальных символов" as UCsymbol_set
+    usecase "Заполнение таблицы переходов" as UCtransitions
+    usecase "Ввод параметров генерации" as UCparameters
+    usecase "Получение изображения графа переходов автомата" as UCgraph_image
+    usecase "Генерация исходного кода" as UC4
+}
+
+User --> UC1
+User --> UC2
+User --> UC4
+User --> UCparameters
+User --> UCgraph_image
+
+UC2 ..> UCstate
+UC2 ..> UCsymbol
+UC2 ..> UCtransitions
+
+UCstate ..> UCinitial_state
+UCstate ..> UCfinal_states
+
+UCsymbol ..> UCsymbol_set
+
+@enduml
