@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RecognizerGenerator
 {
-  internal class CodeGeneratorToPascal
+  internal class CodeGeneratorToPascal : ICodeGenerator
   {
     #region Константы для настройки имён в генерации выходной программы
     #region Префиксы для констант состояний и входных символов

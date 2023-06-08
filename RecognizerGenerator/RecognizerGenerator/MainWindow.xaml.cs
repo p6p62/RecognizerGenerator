@@ -44,20 +44,18 @@ namespace RecognizerGenerator
           List<List<MachineState>> transitionTable = _dataContext.TransitionTable.Select(r => r.ToList()).ToList();
           FiniteStateMachine recognizerFiniteStateMachine = new(_dataContext.States.ToList(), _dataContext.InitialState, _dataContext.InputSymbols.ToList(), transitionTable);
 
-          string[] outputCode = Array.Empty<string>();
+          ICodeGenerator? generator = null;
           switch (OutputLanguageComboBox.SelectedIndex)
           {
             case 0:
-              CodeGeneratorToPascal pascalGenerator = new(recognizerFiniteStateMachine, _dataContext.IsLastCharacterUniversal);
-              outputCode = pascalGenerator.GenerateRecognizerCode();
+              generator = new CodeGeneratorToPascal(recognizerFiniteStateMachine, _dataContext.IsLastCharacterUniversal);
               break;
             case 1:
-              CodeGeneratorToPython3 pythonGenerator = new(recognizerFiniteStateMachine, _dataContext.IsLastCharacterUniversal);
-              outputCode = pythonGenerator.GenerateRecognizerCode();
+              generator = new CodeGeneratorToPython3(recognizerFiniteStateMachine, _dataContext.IsLastCharacterUniversal);
               break;
           }
-
-          RecognizerOutputCodeTextBox.Text = string.Join('\n', outputCode);
+          if (generator is not null)
+            RecognizerOutputCodeTextBox.Text = string.Join('\n', generator.GenerateRecognizerCode());
         }
         else
           MessageBox.Show("Множество конечных состояний автомата пустое", "Ошибка");

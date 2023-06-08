@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RecognizerGenerator
 {
-  internal class CodeGeneratorToPython3
+  internal class CodeGeneratorToPython3 : ICodeGenerator
   {
     #region Константы для настройки имён в генерации выходной программы
     #region Префиксы для констант состояний и входных символов
