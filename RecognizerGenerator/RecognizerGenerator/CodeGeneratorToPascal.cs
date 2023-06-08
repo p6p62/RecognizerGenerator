@@ -46,11 +46,25 @@ namespace RecognizerGenerator
     #endregion
     #endregion
 
+    /// <summary>
+    /// Конечный автомат, на основе которого создаётся программа-распознаватель
+    /// </summary>
     private readonly FiniteStateMachine _recognizerStateMachine;
+    /// <summary>
+    /// Является ли последний входной символ обобщающим для всех неохваченных терминальных символов
+    /// </summary>
     private readonly bool _isLastCharacterUniversal;
 
+    /// <summary>
+    /// Имя выходной программы
+    /// </summary>
     public string RecognizerProgramName { get; set; } = "recognizer";
 
+    /// <summary>
+    /// Конструктор генератора кода
+    /// </summary>
+    /// <param name="recognizerStateMachine">Конечный автомат</param>
+    /// <param name="isLastCharacterUniversal">Флаг универсальности последнего символа</param>
     public CodeGeneratorToPascal(FiniteStateMachine recognizerStateMachine, bool isLastCharacterUniversal)
     {
       _recognizerStateMachine = recognizerStateMachine;
@@ -74,11 +88,19 @@ namespace RecognizerGenerator
       return code.ToArray();
     }
 
+    /// <summary>
+    /// Получение имени программы-распознавателя
+    /// </summary>
+    /// <returns></returns>
     private string GetRecognizerProgramName()
     {
       return $"program {RecognizerProgramName};";
     }
 
+    /// <summary>
+    /// Получение блока констант
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetConstantSection()
     {
       List<string> constantSection = new()
@@ -96,6 +118,10 @@ namespace RecognizerGenerator
       return constantSection;
     }
 
+    /// <summary>
+    /// Генерация констант под состояния автомата
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetStatesConstants()
     {
       int counter = 0;
@@ -104,6 +130,10 @@ namespace RecognizerGenerator
         .ToList();
     }
 
+    /// <summary>
+    /// Генерация констант под входные символы автомата
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetInputSymbolsConstants()
     {
       int counter = 0;
@@ -112,6 +142,10 @@ namespace RecognizerGenerator
         .ToList();
     }
 
+    /// <summary>
+    /// Генерация количественных констант
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetQuantitativeConstants()
     {
       return new List<string>()
@@ -121,6 +155,10 @@ namespace RecognizerGenerator
       };
     }
 
+    /// <summary>
+    /// Генерация секции типов выходной программы
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetTypeSection()
     {
       List<MachineState> states = _recognizerStateMachine.States;
@@ -136,6 +174,10 @@ namespace RecognizerGenerator
       };
     }
 
+    /// <summary>
+    /// Генерация секции переменных
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetVariableSection()
     {
       List<string> variableSection = new()
@@ -164,6 +206,10 @@ namespace RecognizerGenerator
       return variableSection;
     }
 
+    /// <summary>
+    /// Генерация программных блоков (между верхними begin, end)
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetProgramStatements()
     {
       List<string> statements = new() { "begin" };
@@ -174,6 +220,10 @@ namespace RecognizerGenerator
       return statements;
     }
 
+    /// <summary>
+    /// Генерация блока инициализации в выходной программе
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetDataInitializationBlock()
     {
       List<string> dataInitialization = new() { "{Определение соответствия реальных символов входным символам автомата}" };
@@ -188,6 +238,10 @@ namespace RecognizerGenerator
       return dataInitialization;
     }
 
+    /// <summary>
+    /// Настройка сопоставления терминальных символов нетерминальным (входным, вспомогательным) символам
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetInputSymbolSets()
     {
       List<string> symbolSets = new();
@@ -204,6 +258,12 @@ namespace RecognizerGenerator
       return symbolSets;
     }
 
+    /// <summary>
+    /// Получение выражения для инициализации множества терминальных символов при сопоставлении
+    /// Упрощённая версия концепции скобочных выражений POSIX
+    /// </summary>
+    /// <param name="acceptedCharactersExpression">Выражение для определения обрабатываемых символов</param>
+    /// <returns></returns>
     private static StringBuilder GetRealCharactersSetExpression(string acceptedCharactersExpression)
     {
       // распознаёт и захватывает диапазоны непробельных символов вида <начальный символ>-<конечный символ>
@@ -217,11 +277,13 @@ namespace RecognizerGenerator
       {
         if (match.Groups["single"].Success)
         {
+          // захват одиночного символа
           string single = match.Groups["single"].Value;
           setInitializationExpression.Append($"\'{single}\', ");
         }
         else
         {
+          // захват диапазона символов
           string start = match.Groups["rangeStart"].Value;
           string end = match.Groups["rangeEnd"].Value;
           setInitializationExpression.Append($"\'{start}\'..\'{end}\', ");
@@ -234,6 +296,10 @@ namespace RecognizerGenerator
       return setInitializationExpression;
     }
 
+    /// <summary>
+    /// Генерация заполнения таблицы переходов
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetTransitionTableInitialization()
     {
       List<MachineState> states = _recognizerStateMachine.States;
@@ -252,6 +318,10 @@ namespace RecognizerGenerator
       return transitionTableInitialization;
     }
 
+    /// <summary>
+    /// Генерация блока чтения входной последовательности
+    /// </summary>
+    /// <returns></returns>
     private static List<string> GetInputStringReading()
     {
       return new()
@@ -261,6 +331,10 @@ namespace RecognizerGenerator
       };
     }
 
+    /// <summary>
+    /// Генерация блока инициализации переменных
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetVariableInitialization()
     {
       StringBuilder finalStates = new();
@@ -284,6 +358,10 @@ namespace RecognizerGenerator
       };
     }
 
+    /// <summary>
+    /// Генерация блока цикла обработки входной строки
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetWhileLoopStatement()
     {
       List<string> loopStatement = new()
@@ -304,6 +382,10 @@ namespace RecognizerGenerator
       return loopStatement;
     }
 
+    /// <summary>
+    /// Получение блока определения типов символов
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetIfStatements()
     {
       List<string> ifStatements = new();
@@ -332,6 +414,10 @@ namespace RecognizerGenerator
       return ifStatements;
     }
 
+    /// <summary>
+    /// Получение блока генерации ответа распознавателя
+    /// </summary>
+    /// <returns></returns>
     private static List<string> GetEndChecking()
     {
       return new()

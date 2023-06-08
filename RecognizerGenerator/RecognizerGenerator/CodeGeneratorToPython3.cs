@@ -43,18 +43,29 @@ namespace RecognizerGenerator
     #endregion
     #endregion
 
+    /// <summary>
+    /// Конечный автомат, на основе которого создаётся программа-распознаватель
+    /// </summary>
     private readonly FiniteStateMachine _recognizerStateMachine;
+    /// <summary>
+    /// Является ли последний входной символ обобщающим для всех неохваченных терминальных символов
+    /// </summary>
     private readonly bool _isLastCharacterUniversal;
 
+    /// <summary>
+    /// Свойство для генерации согласованных отступов
+    /// </summary>
+    private static string Tab { get; } = "    ";
+
+    /// <summary>
+    /// Конструктор генератора кода
+    /// </summary>
+    /// <param name="recognizerStateMachine">Конечный автомат</param>
+    /// <param name="isLastCharacterUniversal">Флаг универсальности последнего символа</param>
     public CodeGeneratorToPython3(FiniteStateMachine recognizerStateMachine, bool isLastCharacterUniversal)
     {
       _recognizerStateMachine = recognizerStateMachine;
       _isLastCharacterUniversal = isLastCharacterUniversal;
-    }
-
-    private static string Tab(int n = 4)
-    {
-      return new(' ', n);
     }
 
     /// <summary>
@@ -74,6 +85,10 @@ namespace RecognizerGenerator
       return code.ToArray();
     }
 
+    /// <summary>
+    /// Получение блока констант
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetConstantSection()
     {
       List<string> constantSection = new()
@@ -90,6 +105,10 @@ namespace RecognizerGenerator
       return constantSection;
     }
 
+    /// <summary>
+    /// Генерация констант под состояния автомата
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetStatesConstants()
     {
       int counter = 0;
@@ -98,6 +117,10 @@ namespace RecognizerGenerator
         .ToList();
     }
 
+    /// <summary>
+    /// Генерация констант под входные символы автомата
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetInputSymbolsConstants()
     {
       int counter = 0;
@@ -106,6 +129,10 @@ namespace RecognizerGenerator
         .ToList();
     }
 
+    /// <summary>
+    /// Генерация количественных констант
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetQuantitativeConstants()
     {
       return new List<string>()
@@ -115,15 +142,25 @@ namespace RecognizerGenerator
       };
     }
 
+    /// <summary>
+    /// Получение текста функции создания диапазона символов. Необходима 
+    /// для инициализации множеств символов алфавита терминальных символов
+    /// входных последовательностей
+    /// </summary>
+    /// <returns></returns>
     private static List<string> GetCharRangeFunctionSection()
     {
       return new List<string>()
       {
         $"def {FUNCTION_CHAR_RANGE_NAME}(c1: str, c2: str):",
-        $"{Tab()}return {{chr(c) for c in range(ord(c1), ord(c2) + 1)}}"
+        $"{Tab}return {{chr(c) for c in range(ord(c1), ord(c2) + 1)}}"
       };
     }
 
+    /// <summary>
+    /// Генерация программных блоков (определение функции распознавателя и её вызов)
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetProgramStatements()
     {
       List<string> statements = new() { "def recognizer():" };
@@ -136,20 +173,28 @@ namespace RecognizerGenerator
       return statements;
     }
 
+    /// <summary>
+    /// Генерация блока инициализации в выходной программе
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetDataInitializationBlock()
     {
-      List<string> dataInitialization = new() { $"{Tab()}# Определение соответствия реальных символов входным символам автомата" };
+      List<string> dataInitialization = new() { $"{Tab}# Определение соответствия реальных символов входным символам автомата" };
       dataInitialization.AddRange(GetInputSymbolSets());
       dataInitialization.Add("");
-      dataInitialization.Add($"{Tab()}# Заполнение таблицы переходов автомата");
+      dataInitialization.Add($"{Tab}# Заполнение таблицы переходов автомата");
       dataInitialization.AddRange(GetTransitionTableInitialization());
-      dataInitialization.Add($"{Tab()}# Считывание входной строки");
+      dataInitialization.Add($"{Tab}# Считывание входной строки");
       dataInitialization.AddRange(GetInputStringReading());
       dataInitialization.Add("");
       dataInitialization.AddRange(GetVariableInitialization());
       return dataInitialization;
     }
 
+    /// <summary>
+    /// Настройка сопоставления терминальных символов нетерминальным (входным, вспомогательным) символам
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetInputSymbolSets()
     {
       List<string> symbolSets = new();
@@ -158,7 +203,7 @@ namespace RecognizerGenerator
       foreach (InputSymbol inputSymbol in _recognizerStateMachine.InputSymbols)
       {
         StringBuilder symbolsSetInitializationExpression = new(
-          $"{Tab()}{REAL_INPUT_SYMBOLS_PREFIX}{inputSymbol.Name} = {{");
+          $"{Tab}{REAL_INPUT_SYMBOLS_PREFIX}{inputSymbol.Name} = {{");
         symbolsSetInitializationExpression.Append(GetRealCharactersSetExpression(inputSymbol.AcceptedCharactersExpression));
         symbolsSetInitializationExpression.Append('}');
         symbolSets.Add(symbolsSetInitializationExpression.ToString());
@@ -166,6 +211,12 @@ namespace RecognizerGenerator
       return symbolSets;
     }
 
+    /// <summary>
+    /// Получение выражения для инициализации множества терминальных символов при сопоставлении
+    /// Упрощённая версия концепции скобочных выражений POSIX
+    /// </summary>
+    /// <param name="acceptedCharactersExpression">Выражение для определения обрабатываемых символов</param>
+    /// <returns></returns>
     private static StringBuilder GetRealCharactersSetExpression(string acceptedCharactersExpression)
     {
       // распознаёт и захватывает диапазоны непробельных символов вида <начальный символ>-<конечный символ>
@@ -179,11 +230,13 @@ namespace RecognizerGenerator
       {
         if (match.Groups["single"].Success)
         {
+          // захват одиночного символа
           string single = match.Groups["single"].Value;
           setInitializationExpression.Append($"\'{single}\', ");
         }
         else
         {
+          // захват диапазона символов
           string start = match.Groups["rangeStart"].Value;
           string end = match.Groups["rangeEnd"].Value;
           setInitializationExpression.Append($"*{FUNCTION_CHAR_RANGE_NAME}(\'{start}\', \'{end}\'), ");
@@ -196,20 +249,24 @@ namespace RecognizerGenerator
       return setInitializationExpression;
     }
 
+    /// <summary>
+    /// Генерация заполнения таблицы переходов
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetTransitionTableInitialization()
     {
       List<MachineState> states = _recognizerStateMachine.States;
       List<InputSymbol> inputSymbols = _recognizerStateMachine.InputSymbols;
       List<string> transitionTableInitialization = new()
       {
-        $"{Tab()}{VAR_NAME_TRANSITION_TABLE} = tuple([0 for _ in range({CONSTANT_NAME_INPUT_SYMBOLS_COUNT})] for _ in range({CONSTANT_NAME_STATES_COUNT}))"
+        $"{Tab}{VAR_NAME_TRANSITION_TABLE} = tuple([0 for _ in range({CONSTANT_NAME_INPUT_SYMBOLS_COUNT})] for _ in range({CONSTANT_NAME_STATES_COUNT}))"
       };
       for (int i = 0; i < states.Count; i++)
       {
         for (int j = 0; j < inputSymbols.Count; j++)
         {
           transitionTableInitialization.Add(
-            $"{Tab()}{VAR_NAME_TRANSITION_TABLE}[{OUT_PREFIX_STATE}{states[i].Name}][{OUT_PREFIX_INPUT_SYMBOL}{inputSymbols[j].Name}]" +
+            $"{Tab}{VAR_NAME_TRANSITION_TABLE}[{OUT_PREFIX_STATE}{states[i].Name}][{OUT_PREFIX_INPUT_SYMBOL}{inputSymbols[j].Name}]" +
             $" = {OUT_PREFIX_STATE}{_recognizerStateMachine.TransitionTable[i][j].Name}");
         }
         transitionTableInitialization.Add("");
@@ -217,14 +274,22 @@ namespace RecognizerGenerator
       return transitionTableInitialization;
     }
 
+    /// <summary>
+    /// Генерация блока чтения входной последовательности
+    /// </summary>
+    /// <returns></returns>
     private static List<string> GetInputStringReading()
     {
       return new()
       {
-        $"{Tab()}{VAR_NAME_INPUT_STRING} = input()"
+        $"{Tab}{VAR_NAME_INPUT_STRING} = input()"
       };
     }
 
+    /// <summary>
+    /// Генерация блока инициализации переменных
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetVariableInitialization()
     {
       StringBuilder finalStates = new();
@@ -239,29 +304,37 @@ namespace RecognizerGenerator
         finalStates.Remove(finalStates.Length - 2, 2);
       return new()
       {
-        $"{Tab()}# Определение конечных состояний",
-        $"{Tab()}{VAR_NAME_FINAL_STATES_SET} = {{{finalStates}}}",
+        $"{Tab}# Определение конечных состояний",
+        $"{Tab}{VAR_NAME_FINAL_STATES_SET} = {{{finalStates}}}",
         "",
-        $"{Tab()}# Установка автомата в начальное состояние",
-        $"{Tab()}{VAR_NAME_CURRENT_STATE} = {OUT_PREFIX_STATE}{_recognizerStateMachine.InitialState.Name}"
+        $"{Tab}# Установка автомата в начальное состояние",
+        $"{Tab}{VAR_NAME_CURRENT_STATE} = {OUT_PREFIX_STATE}{_recognizerStateMachine.InitialState.Name}"
       };
     }
 
+    /// <summary>
+    /// Генерация блока цикла обработки входной строки
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetLoopStatement()
     {
       List<string> loopStatement = new()
       {
         "",
-        $"{Tab()}for {VAR_NAME_SINGLE_CHAR} in {VAR_NAME_INPUT_STRING}:",
-        $"{Tab()}{Tab()}# Взятие очередного символа и определение его типа"
+        $"{Tab}for {VAR_NAME_SINGLE_CHAR} in {VAR_NAME_INPUT_STRING}:",
+        $"{Tab}{Tab}# Взятие очередного символа и определение его типа"
       };
       loopStatement.AddRange(GetIfStatements());
       loopStatement.Add("");
-      loopStatement.Add($"{Tab()}{Tab()}# Переход автомата в новое состояние и смещение на следующий символ");
-      loopStatement.Add($"{Tab()}{Tab()}{VAR_NAME_CURRENT_STATE} = {VAR_NAME_TRANSITION_TABLE}[{VAR_NAME_CURRENT_STATE}][{VAR_NAME_SINGLE_CHAR_KIND}]");
+      loopStatement.Add($"{Tab}{Tab}# Переход автомата в новое состояние и смещение на следующий символ");
+      loopStatement.Add($"{Tab}{Tab}{VAR_NAME_CURRENT_STATE} = {VAR_NAME_TRANSITION_TABLE}[{VAR_NAME_CURRENT_STATE}][{VAR_NAME_SINGLE_CHAR_KIND}]");
       return loopStatement;
     }
 
+    /// <summary>
+    /// Получение блока определения типов символов
+    /// </summary>
+    /// <returns></returns>
     private List<string> GetIfStatements()
     {
       List<string> ifStatements = new();
@@ -271,36 +344,40 @@ namespace RecognizerGenerator
       int counter = 0;
       foreach (InputSymbol inputSymbol in symbolsInConditions)
       {
-        StringBuilder expr = counter++ > 0 ? new($"{Tab()}{Tab()}elif ") : new($"{Tab()}{Tab()}if ");
+        StringBuilder expr = counter++ > 0 ? new($"{Tab}{Tab}elif ") : new($"{Tab}{Tab}if ");
         if (inputSymbol.Excusion)
           expr.Append($"not {VAR_NAME_SINGLE_CHAR} in {REAL_INPUT_SYMBOLS_PREFIX}{inputSymbol.Name}:");
         else
           expr.Append($"{VAR_NAME_SINGLE_CHAR} in {REAL_INPUT_SYMBOLS_PREFIX}{inputSymbol.Name}:");
         ifStatements.Add(expr.ToString());
-        ifStatements.Add($"{Tab()}{Tab()}{Tab()}{VAR_NAME_SINGLE_CHAR_KIND} = {OUT_PREFIX_INPUT_SYMBOL}{inputSymbol.Name}");
+        ifStatements.Add($"{Tab}{Tab}{Tab}{VAR_NAME_SINGLE_CHAR_KIND} = {OUT_PREFIX_INPUT_SYMBOL}{inputSymbol.Name}");
       }
-      ifStatements.Add($"{Tab()}{Tab()}else:");
+      ifStatements.Add($"{Tab}{Tab}else:");
 
       if (_isLastCharacterUniversal)
-        ifStatements.Add($"{Tab()}{Tab()}{Tab()}{VAR_NAME_SINGLE_CHAR_KIND} = {OUT_PREFIX_INPUT_SYMBOL}{_recognizerStateMachine.InputSymbols.Last().Name}");
+        ifStatements.Add($"{Tab}{Tab}{Tab}{VAR_NAME_SINGLE_CHAR_KIND} = {OUT_PREFIX_INPUT_SYMBOL}{_recognizerStateMachine.InputSymbols.Last().Name}");
       else
       {
-        ifStatements.Add($"{Tab()}{Tab()}{Tab()}print(\'{MESSAGE_REJECTED}\')");
-        ifStatements.Add($"{Tab()}{Tab()}{Tab()}return");
+        ifStatements.Add($"{Tab}{Tab}{Tab}print(\'{MESSAGE_REJECTED}\')");
+        ifStatements.Add($"{Tab}{Tab}{Tab}return");
       }
       return ifStatements;
     }
 
+    /// <summary>
+    /// Получение блока генерации ответа распознавателя
+    /// </summary>
+    /// <returns></returns>
     private static List<string> GetEndChecking()
     {
       return new()
       {
         "",
-        $"{Tab()}# Вывод результата",
-        $"{Tab()}if {VAR_NAME_CURRENT_STATE} in {VAR_NAME_FINAL_STATES_SET}:",
-        $"{Tab()}{Tab()}print(\'{MESSAGE_ACCEPTED}\')",
-        $"{Tab()}else:",
-        $"{Tab()}{Tab()}print(\'{MESSAGE_REJECTED}\')"
+        $"{Tab}# Вывод результата",
+        $"{Tab}if {VAR_NAME_CURRENT_STATE} in {VAR_NAME_FINAL_STATES_SET}:",
+        $"{Tab}{Tab}print(\'{MESSAGE_ACCEPTED}\')",
+        $"{Tab}else:",
+        $"{Tab}{Tab}print(\'{MESSAGE_REJECTED}\')"
       };
     }
   }
