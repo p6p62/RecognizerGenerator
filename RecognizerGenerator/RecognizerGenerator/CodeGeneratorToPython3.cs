@@ -5,6 +5,22 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
+/*
+ * Тема ВКР: Разработка программного обеспечения для автоматизации создания распознавателя регулярного языка
+ * 
+ * Разработчик: Гладышев Б. А.
+ * Номер направления: 09.03.04
+ * Номер группы: 943
+ * 
+ * Руководитель ВКР: Никичкин Б. В., доцент, к.т.н.
+ * 
+ * Средства разработки: Microsoft Visual Studio 2022, .NET 6.0
+ * 
+ * Назначение модуля: генерация выходного кода программ-распознавателей на языке Python
+ * 
+ * Дата разработки: 6 июня 2023 года
+ */
+
 namespace RecognizerGenerator
 {
   internal class CodeGeneratorToPython3 : ICodeGenerator
